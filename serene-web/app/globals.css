@@ -1,0 +1,78 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  :root {
+    --background: 43 60% 97%;           /* cream-50  #FDFBF7 */
+    --foreground: 40 4% 29%;            /* slate-warm #4A4A45 */
+    --card: 40 43% 96%;                 /* cream-100 #F9F5EE */
+    --card-foreground: 40 4% 29%;
+    --popover: 43 60% 97%;
+    --popover-foreground: 40 4% 29%;
+    --primary: 114 20% 39%;             /* sage-600  #4E7A44 */
+    --primary-foreground: 110 32% 94%; /* sage-100  #E8EFE4 */
+    --secondary: 110 25% 89%;          /* sage-100  #E8EFE4 */
+    --secondary-foreground: 114 25% 22%; /* sage-800 #2C4827 */
+    --muted: 40 30% 92%;               /* cream-200 #F0E9DA */
+    --muted-foreground: 40 4% 48%;     /* slate-muted #7A7A74 */
+    --accent: 110 25% 89%;
+    --accent-foreground: 114 25% 22%;
+    --destructive: 0 60% 45%;
+    --destructive-foreground: 43 60% 97%;
+    --border: 40 20% 82%;
+    --input: 40 20% 82%;
+    --ring: 114 20% 39%;
+    --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 40 8% 12%;
+    --foreground: 40 30% 88%;
+    --card: 40 8% 16%;
+    --card-foreground: 40 30% 88%;
+    --popover: 40 8% 12%;
+    --popover-foreground: 40 30% 88%;
+    --primary: 114 20% 55%;
+    --primary-foreground: 114 25% 14%;
+    --secondary: 114 12% 22%;
+    --secondary-foreground: 110 25% 85%;
+    --muted: 40 8% 20%;
+    --muted-foreground: 40 4% 58%;
+    --accent: 114 12% 22%;
+    --accent-foreground: 110 25% 85%;
+    --destructive: 0 55% 50%;
+    --destructive-foreground: 43 60% 97%;
+    --border: 40 8% 24%;
+    --input: 40 8% 24%;
+    --ring: 114 20% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-cream-50 text-slate-warm font-sans;
+    font-size: 1rem;
+    line-height: 1.7;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif;
+    font-weight: 500; /* bible §6: headings are weight 500 ONLY, never 700 */
+    line-height: 1.2;
+  }
+  /* Prevent pure black/white per bible §6 */
+  :root {
+    color-scheme: light dark;
+  }
+}

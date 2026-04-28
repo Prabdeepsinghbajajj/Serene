@@ -1,0 +1,219 @@
+"use client";
+
+export const dynamic = "force-dynamic";
+
+import { useEffect, useRef, useState } from "react";
+import { motion } from "framer-motion";
+import { PostCard } from "@/components/feed/post-card";
+import { FeedSkeleton } from "@/components/feed/feed-skeleton";
+import { EthicalAdCard } from "@/components/ads/ethical-ad-card";
+import { Heading, Body } from "@/components/ui/typography";
+import type { FeedPost } from "@/types/feed";
+import type { ServedAd } from "@/types/ads";
+
+/* -------------------------------------------------------------------------- */
+/*  Small leaf SVG for empty/end states                                        */
+/* -------------------------------------------------------------------------- */
+function LeafSmall() {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <path
+        d="M12 21C8 21 4 17 4 12C4 7 8 3 12 3C16 3 20 7 20 12C20 17 16 21 12 21Z"
+        fill="#C9DBC2"
+        opacity="0.7"
+      />
+      <path
+        d="M12 20V9"
+        stroke="#87AA7E"
+        strokeWidth="1.2"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
+    </svg>
+  );
+}
+
+function LeafIllustration() {
+  return (
+    <svg width="64" height="64" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+      <path
+        d="M32 56C20 56 10 46 10 32C10 18 20 8 32 8C44 8 54 18 54 32C54 46 44 56 32 56Z"
+        fill="#C9DBC2"
+        opacity="0.5"
+      />
+      <path
+        d="M32 54V18"
+        stroke="#87AA7E"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        opacity="0.6"
+      />
+    </svg>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Ad slot — lazy-loads when the 5th card scrolls into view                  */
+/* -------------------------------------------------------------------------- */
+function AdSlot() {
+  const ref = useRef<HTMLDivElement>(null);
+  const [ad, setAd] = useState<ServedAd | null | "loading" | "none">("loading");
+  const fetched = useRef(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && !fetched.current) {
+          fetched.current = true;
+          fetch("/api/ads/next")
+            .then((r) => r.json())
+            .then((data: { ad: ServedAd | null }) => {
+              setAd(data.ad ?? "none");
+            })
+            .catch(() => setAd("none"));
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
+  return (
+    <div ref={ref}>
+      {ad === "loading" || ad === "none" || ad === null ? null : (
+        <EthicalAdCard
+          ad={ad}
+          onDismiss={() => setAd("none")}
+        />
+      )}
+    </div>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Discover page                                                               */
+/* -------------------------------------------------------------------------- */
+interface DiscoverResponse {
+  posts: FeedPost[];
+  refreshes_at: string;
+}
+
+export default function DiscoverPage() {
+  const [posts, setPosts] = useState<FeedPost[]>([]);
+  const [refreshesAt, setRefreshesAt] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [alreadySeen, setAlreadySeen] = useState(false);
+
+  useEffect(() => {
+    // Check if we already fetched today (client-side guard to detect cached response)
+    const todayKey = new Date().toISOString().split("T")[0];
+    const seenKey = `serene_discover_seen_${todayKey}`;
+    const wasSeen = typeof window !== "undefined" && !!sessionStorage.getItem(seenKey);
+    if (wasSeen) setAlreadySeen(true);
+
+    fetch("/api/discover")
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Failed to load.");
+        return res.json() as Promise<DiscoverResponse>;
+      })
+      .then((data) => {
+        setPosts(data.posts);
+        setRefreshesAt(data.refreshes_at);
+        // Mark as seen for this session
+        if (typeof window !== "undefined") {
+          sessionStorage.setItem(seenKey, "1");
+        }
+      })
+      .catch(() => setError("Couldn't load today's picks. Try again later."))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  function formatMidnight(iso: string | null): string {
+    if (!iso) return "midnight";
+    return new Date(iso).toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  return (
+    <div className="max-w-xl mx-auto px-4 pt-6 pb-16">
+      {/* ---- Header ---- */}
+      <div className="mb-6 space-y-1">
+        <Heading as="h1" size="md">
+          A few things we thought you&apos;d enjoy
+        </Heading>
+        <Body muted className="text-sm">
+          Curated just for you.
+        </Body>
+        {refreshesAt && (
+          <p className="font-sans text-xs text-slate-hint">
+            Refreshes at {formatMidnight(refreshesAt)}
+          </p>
+        )}
+      </div>
+
+      {/* "Already seen today" banner */}
+      {alreadySeen && !isLoading && (
+        <div className="mb-4 rounded-lg bg-sage-100 px-4 py-3">
+          <p className="font-sans text-sm text-sage-600">
+            You&apos;ve already explored today&apos;s picks.
+          </p>
+        </div>
+      )}
+
+      {/* Loading */}
+      {isLoading && <FeedSkeleton />}
+
+      {/* Error */}
+      {!isLoading && error && (
+        <div className="py-12 text-center">
+          <Body muted>{error}</Body>
+        </div>
+      )}
+
+      {/* Empty */}
+      {!isLoading && !error && posts.length === 0 && (
+        <div className="flex flex-col items-center text-center pt-16 space-y-4">
+          <LeafIllustration />
+          <Heading as="h2" size="md">
+            Check back tomorrow
+          </Heading>
+          <Body muted>New discoveries arrive each day.</Body>
+        </div>
+      )}
+
+      {/* Post list with ad after 5th card */}
+      {!isLoading && posts.length > 0 && (
+        <motion.div
+          className="space-y-4"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3 }}
+        >
+          {posts.map((post, idx) => (
+            <div key={post.id}>
+              <PostCard post={post} />
+              {/* Insert ad slot after 5th post (index 4) — 1 ad per 10 posts (§10) */}
+              {idx === 4 && <div className="mt-4"><AdSlot /></div>}
+            </div>
+          ))}
+
+          {/* End of discovery */}
+          <div className="flex items-center justify-center gap-2 py-8 text-slate-hint">
+            <LeafSmall />
+            <span className="font-sans text-sm">
+              That&apos;s today&apos;s discovery. Come back tomorrow for more.
+            </span>
+          </div>
+        </motion.div>
+      )}
+    </div>
+  );
+}
