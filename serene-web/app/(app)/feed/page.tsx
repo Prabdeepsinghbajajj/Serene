@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useFeed } from "@/hooks/use-feed";
@@ -10,6 +10,34 @@ import { PostCard } from "@/components/feed/post-card";
 import { FeedSkeleton } from "@/components/feed/feed-skeleton";
 import { Button } from "@/components/ui/button";
 import { Heading, Body } from "@/components/ui/typography";
+
+/* -------------------------------------------------------------------------- */
+/*  Time-based greeting — client only to avoid hydration mismatch             */
+/* -------------------------------------------------------------------------- */
+function FeedGreeting() {
+  const [greeting, setGreeting] = useState<{ text: string; date: string } | null>(null);
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    const text =
+      hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+    const date = new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+    setGreeting({ text, date });
+  }, []);
+
+  if (!greeting) return null;
+
+  return (
+    <div className="mb-6">
+      <p className="font-serif italic text-lg text-slate-muted">{greeting.text}</p>
+      <p className="font-sans text-xs text-slate-hint mt-0.5">{greeting.date}</p>
+    </div>
+  );
+}
 
 function LeafEmpty() {
   return (
@@ -83,7 +111,9 @@ export default function FeedPage() {
   }, []);
 
   return (
-    <div className="max-w-xl mx-auto px-4 pt-6 pb-8">
+    <div className="max-w-xl mx-auto px-4 pt-8 pb-8">
+      <FeedGreeting />
+
       {/* Loading */}
       {isLoading && <FeedSkeleton />}
 

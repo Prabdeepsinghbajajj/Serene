@@ -8,6 +8,16 @@
   }
 }
 
+/* Phone mockup float animation — used on landing page only */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-14px); }
+}
+
+.float-animation {
+  animation: float 4.5s ease-in-out infinite;
+}
+
 @layer base {
   :root {
     --background: 43 60% 97%;           /* cream-50  #FDFBF7 */

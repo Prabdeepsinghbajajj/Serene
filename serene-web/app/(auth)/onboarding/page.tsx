@@ -6,7 +6,7 @@ import { useState, useRef } from "react";
 export const dynamic = "force-dynamic";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, ChevronLeft } from "lucide-react";
+import { Loader2, ChevronLeft, Check } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -241,12 +241,17 @@ export default function OnboardingPage() {
                       key={opt.value}
                       type="button"
                       onClick={() => setPersonality(opt.value)}
-                      className={`text-left rounded-xl p-4 border-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 ${
+                      className={`relative text-left rounded-xl p-4 border-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 ${
                         personality === opt.value
-                          ? "border-sage-400 bg-sage-100"
+                          ? "border-sage-400 bg-sage-100 scale-[1.02]"
                           : "border-transparent bg-cream-100 hover:border-cream-200"
                       }`}
                     >
+                      {personality === opt.value && (
+                        <span className="absolute top-2.5 right-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-sage-600">
+                          <Check size={11} className="text-white" aria-hidden="true" />
+                        </span>
+                      )}
                       <span className="text-2xl block mb-2">{opt.emoji}</span>
                       <span className="block font-sans font-medium text-slate-warm text-sm leading-tight">
                         {opt.label}
@@ -288,12 +293,17 @@ export default function OnboardingPage() {
                       key={opt.value}
                       type="button"
                       onClick={() => setTimePreference(opt.value)}
-                      className={`text-left rounded-xl p-4 border-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 ${
+                      className={`relative text-left rounded-xl p-4 border-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 ${
                         timePreference === opt.value
-                          ? "border-sage-400 bg-sage-100"
+                          ? "border-sage-400 bg-sage-100 scale-[1.02]"
                           : "border-transparent bg-cream-100 hover:border-cream-200"
                       }`}
                     >
+                      {timePreference === opt.value && (
+                        <span className="absolute top-2.5 right-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-sage-600">
+                          <Check size={11} className="text-white" aria-hidden="true" />
+                        </span>
+                      )}
                       <span className="text-2xl block mb-2">{opt.emoji}</span>
                       <span className="block font-sans font-medium text-slate-warm text-sm">
                         {opt.label}

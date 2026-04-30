@@ -54,6 +54,7 @@ const config: Config = {
       fontFamily: {
         serif: ['var(--font-instrument-serif)', 'Georgia', 'serif'],
         sans: ['var(--font-dm-sans)', 'system-ui', 'sans-serif'],
+        display: ['var(--font-cormorant)', 'Georgia', 'serif'],
         mono: ['ui-monospace', 'monospace'],
       },
       fontSize: {

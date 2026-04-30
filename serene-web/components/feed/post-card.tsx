@@ -257,7 +257,7 @@ export function PostCard({ post }: { post: FeedPost }) {
   return (
     <article
       ref={cardRef}
-      className="rounded-xl border border-cream-200 bg-card p-4 sm:p-6 space-y-4"
+      className="rounded-xl border border-cream-200 bg-card p-4 sm:p-6 space-y-4 transition-all duration-200 hover:scale-[1.002] hover:shadow-[0_4px_20px_rgba(0,0,0,0.07)]"
     >
       {/* ---- Header ---- */}
       <div className="flex items-center gap-3">
@@ -274,13 +274,14 @@ export function PostCard({ post }: { post: FeedPost }) {
         </Avatar>
 
         <div className="flex-1 min-w-0">
-          <p className="font-sans text-sm font-medium text-slate-warm truncate">
+          <p className="font-sans text-sm font-medium text-slate-warm truncate tracking-[0.01em]">
             {post.creator.display_name}
           </p>
         </div>
 
         {post.mood_tag && (
-          <span className="flex-shrink-0 rounded-full bg-sage-100 px-2.5 py-0.5 font-sans text-xs font-medium text-sage-600">
+          <span className="flex-shrink-0 rounded-full bg-sage-100 px-2.5 py-0.5 font-sans text-xs font-medium text-sage-600 tracking-[0.08em] flex items-center gap-1">
+            <span aria-hidden="true" className="text-[8px] leading-none">●</span>
             {capitalize(post.mood_tag)}
           </span>
         )}
@@ -325,22 +326,40 @@ export function PostCard({ post }: { post: FeedPost }) {
       {/* ---- AI companion message ---- */}
       {post.ai_companion_message && (
         <div className="rounded-lg bg-sage-100 p-4 space-y-1.5">
-          <p className="font-sans text-xs text-slate-hint uppercase tracking-wide">
-            A note from your companion
-          </p>
+          <div className="flex items-center gap-1.5">
+            {/* Inline leaf — keeps companion note visually grounded (§6) */}
+            <svg width="11" height="11" viewBox="0 0 24 24" aria-hidden="true" className="flex-shrink-0 text-sage-400">
+              <path
+                d="M12 21C8 21 4 17 4 12C4 7 8 3 12 3C16 3 20 7 20 12C20 17 16 21 12 21Z"
+                fill="currentColor"
+                opacity="0.5"
+              />
+              <path
+                d="M12 20V9"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                opacity="0.8"
+              />
+            </svg>
+            <p className="font-sans text-xs text-slate-hint uppercase tracking-wide">
+              A note from your companion
+            </p>
+          </div>
           <Companion>{post.ai_companion_message}</Companion>
         </div>
       )}
 
       {/* ---- Action row — NO counts (bible §6) ---- */}
       <div className="flex items-center justify-between pt-1">
+        {/* 44px touch target via p-3 */}
         <button
           type="button"
           onClick={handleResonate}
           disabled={resonating}
           aria-label={resonated ? "Remove resonance" : "Resonate with this post"}
           aria-pressed={resonated}
-          className="flex items-center gap-1.5 rounded-lg p-1.5 transition-colors hover:bg-cream-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-lg p-3 -ml-3 transition-colors hover:bg-cream-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 disabled:opacity-50"
         >
           <LeafIcon filled={resonated} />
         </button>
@@ -349,7 +368,7 @@ export function PostCard({ post }: { post: FeedPost }) {
         <button
           type="button"
           aria-label="Comments"
-          className="flex items-center gap-1.5 rounded-lg p-1.5 text-slate-hint transition-colors hover:bg-cream-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400"
+          className="flex items-center gap-1.5 rounded-lg p-3 -mr-3 text-slate-hint transition-colors hover:bg-cream-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400"
         >
           <MessageCircle size={20} aria-hidden="true" />
         </button>

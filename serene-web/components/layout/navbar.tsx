@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Compass, Plus, User } from "lucide-react";
+import { House, Compass, Plus, User, LogOut } from "lucide-react";
 import { useUser } from "@/context/user-context";
 
 /* -------------------------------------------------------------------------- */
@@ -61,12 +61,12 @@ function LeafNavIcon({ className }: { className?: string }) {
 /* -------------------------------------------------------------------------- */
 interface NavItem {
   label: string;
-  href: string | ((username: string) => string);
+  href: string | ((username: string | undefined) => string);
   icon: React.ReactNode;
   isCreate?: boolean;
 }
 
-function useNavItems(username: string): { href: string; item: NavItem }[] {
+function useNavItems(username: string | undefined): { href: string; item: NavItem }[] {
   const items: NavItem[] = [
     { label: "Home", href: "/feed", icon: <House size={20} aria-hidden="true" /> },
     { label: "Discover", href: "/discover", icon: <Compass size={20} aria-hidden="true" /> },
@@ -78,7 +78,9 @@ function useNavItems(username: string): { href: string; item: NavItem }[] {
     },
     {
       label: "Profile",
-      href: (u: string) => `/profile/${u}`,
+      // Fall back to /profile (server redirect) until username is known —
+      // never construct /profile/undefined or a stale placeholder
+      href: (u: string | undefined) => (u ? `/profile/${u}` : "/profile"),
       icon: <User size={20} aria-hidden="true" />,
     },
     {
@@ -103,6 +105,7 @@ function NavLink({
   icon,
   isCreate = false,
   active,
+  muted = false,
   variant,
 }: {
   href: string;
@@ -110,6 +113,7 @@ function NavLink({
   icon: React.ReactNode;
   isCreate?: boolean;
   active: boolean;
+  muted?: boolean;
   variant: "sidebar" | "tab";
 }) {
   if (variant === "sidebar") {
@@ -118,16 +122,16 @@ function NavLink({
         href={href}
         aria-label={label}
         aria-current={active ? "page" : undefined}
-        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 font-sans text-sm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 ${
+        className={`flex items-center gap-3 rounded-lg py-2.5 font-sans text-sm transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 border-l-2 ${
           active
-            ? "bg-sage-100 text-sage-600"
-            : "text-slate-muted hover:bg-cream-200 hover:text-slate-warm"
-        }`}
+            ? "bg-sage-100 text-sage-600 border-sage-600 pl-[10px] pr-3"
+            : "text-slate-muted hover:bg-cream-200 hover:text-slate-warm border-transparent px-3"
+        } ${muted ? "opacity-60" : "opacity-100"}`}
       >
         <span
           className={
             isCreate
-              ? "flex h-7 w-7 items-center justify-center rounded-lg bg-sage-100"
+              ? "flex h-8 w-8 items-center justify-center rounded-full bg-sage-600 text-white"
               : ""
           }
         >
@@ -144,14 +148,14 @@ function NavLink({
       href={href}
       aria-label={label}
       aria-current={active ? "page" : undefined}
-      className={`flex flex-col items-center gap-1 pt-2 pb-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 rounded-lg ${
+      className={`flex flex-col items-center gap-1 pt-2 pb-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 rounded-lg transition-all ${
         active ? "text-sage-600" : "text-slate-hint"
-      }`}
+      } ${muted ? "opacity-60" : "opacity-100"}`}
     >
       <span
         className={
           isCreate
-            ? "flex h-9 w-9 items-center justify-center rounded-full bg-sage-100"
+            ? "flex h-9 w-9 items-center justify-center rounded-full bg-sage-600 text-white"
             : ""
         }
       >
@@ -167,8 +171,8 @@ function NavLink({
 /* -------------------------------------------------------------------------- */
 export function Navbar() {
   const pathname = usePathname();
-  const { profile } = useUser();
-  const username = profile?.username ?? "me";
+  const { profile, loading, signOut } = useUser();
+  const username = profile?.username; // undefined while loading — never use "me" as fallback
   const navItems = useNavItems(username);
 
   function isActive(href: string) {
@@ -185,25 +189,43 @@ export function Navbar() {
         className="hidden md:flex fixed left-0 top-0 bottom-0 w-64 flex-col bg-cream-50 border-r border-cream-200 z-30"
         aria-label="Main navigation"
       >
-        {/* Wordmark */}
-        <div className="px-6 py-6 flex-shrink-0">
-          <span className="font-serif text-xl text-sage-600">Serene</span>
+        {/* Wordmark — links to /feed */}
+        <div className="px-6 py-6 flex-shrink-0 border-b border-cream-200">
+          <Link
+            href="/feed"
+            className="font-serif text-2xl text-sage-600 cursor-pointer no-underline hover:text-sage-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 rounded"
+          >
+            Serene
+          </Link>
         </div>
 
         {/* Nav links */}
         <nav className="flex-1 px-2 space-y-1 overflow-y-auto">
           {navItems.map(({ href, item }) => (
             <NavLink
-              key={href}
+              key={item.label}
               href={href}
               label={item.label}
               icon={item.icon}
               isCreate={item.isCreate}
               active={isActive(href)}
+              muted={item.label === "Profile" && loading}
               variant="sidebar"
             />
           ))}
         </nav>
+
+        {/* Sign out — bottom of sidebar, muted utility action */}
+        <div className="flex-shrink-0 px-2 py-4 border-t border-cream-200">
+          <button
+            type="button"
+            onClick={signOut}
+            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 font-sans text-sm text-slate-muted hover:bg-cream-200 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400"
+          >
+            <LogOut size={20} aria-hidden="true" />
+            Sign out
+          </button>
+        </div>
       </aside>
 
       {/* ================================================================= */}
@@ -213,7 +235,12 @@ export function Navbar() {
         className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-center bg-cream-50/90 backdrop-blur border-b border-cream-200 h-14"
         aria-label="Serene"
       >
-        <span className="font-serif text-lg text-sage-600">Serene</span>
+        <Link
+          href="/feed"
+          className="font-serif text-lg text-sage-600 cursor-pointer no-underline hover:text-sage-800 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 rounded"
+        >
+          Serene
+        </Link>
       </header>
 
       {/* ================================================================= */}
@@ -226,12 +253,13 @@ export function Navbar() {
       >
         {navItems.map(({ href, item }) => (
           <NavLink
-            key={href}
+            key={item.label}
             href={href}
             label={item.label}
             icon={item.icon}
             isCreate={item.isCreate}
             active={isActive(href)}
+            muted={item.label === "Profile" && loading}
             variant="tab"
           />
         ))}

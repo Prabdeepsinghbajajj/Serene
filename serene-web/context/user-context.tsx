@@ -33,12 +33,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const supabaseRef = useRef(supabase);
 
   async function fetchProfile(userId: string) {
-    const { data } = await supabaseRef.current
+    const { data, error } = await supabaseRef.current
       .from("users")
       .select("*")
       .eq("id", userId)
       .single();
-    setProfile(data);
+    // Only set profile when the row actually exists — guard against RLS
+    // errors or missing rows (e.g. user created but onboarding not finished)
+    if (data && !error) {
+      setProfile(data);
+    } else {
+      setProfile(null);
+    }
   }
 
   async function refreshProfile() {
@@ -47,9 +53,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   async function signOut() {
     await supabaseRef.current.auth.signOut();
+    // Clear state synchronously before navigating
     setProfile(null);
     setSupabaseUser(null);
     setSession(null);
+    // Full page reload — clears all React context, Zustand, and sessionStorage
+    // so the next sign-in starts completely fresh
+    window.location.href = "/login";
   }
 
   useEffect(() => {

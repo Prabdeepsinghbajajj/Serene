@@ -116,7 +116,7 @@ function ToggleRow({
 export default function EditProfilePage() {
   const params = useParams();
   const router = useRouter();
-  const { profile: myProfile, refreshProfile } = useUser();
+  const { profile: myProfile, refreshProfile, signOut } = useUser();
   const supabase = createClient();
 
   const username = params.username as string;
@@ -509,6 +509,17 @@ export default function EditProfilePage() {
           </div>
         </form>
       </Form>
+
+      {/* Sign out — accessible from mobile via Profile → Edit */}
+      <div className="mt-8 pt-6 border-t border-cream-200 flex justify-center">
+        <button
+          type="button"
+          onClick={signOut}
+          className="font-sans text-sm text-slate-muted hover:text-slate-warm transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 rounded"
+        >
+          Sign out
+        </button>
+      </div>
     </div>
   );
 }
