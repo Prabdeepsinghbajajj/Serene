@@ -1,6 +1,12 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 
+// REMINDER: Ensure these are set in the Vercel dashboard before deploying:
+//   NEXT_PUBLIC_SERENE_SUPABASE_URL
+//   NEXT_PUBLIC_SERENE_SUPABASE_ANON_KEY
+//   SERENE_SUPABASE_SERVICE_KEY
+// Without them OAuth callback exchange will redirect to /login?error=not_configured.
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
