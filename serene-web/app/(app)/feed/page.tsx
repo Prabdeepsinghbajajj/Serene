@@ -33,8 +33,8 @@ function FeedGreeting() {
 
   return (
     <div className="mb-6">
-      <p className="font-serif italic text-lg text-slate-muted">{greeting.text}</p>
-      <p className="font-sans text-xs text-slate-hint mt-0.5">{greeting.date}</p>
+      <p className="font-display italic text-lg" style={{ color: "rgba(245,240,232,0.35)" }}>{greeting.text}</p>
+      <p className="font-sans text-xs mt-0.5" style={{ color: "rgba(245,240,232,0.18)" }}>{greeting.date}</p>
     </div>
   );
 }
@@ -87,7 +87,7 @@ function EndOfFeed() {
           opacity="0.6"
         />
       </svg>
-      <span className="font-sans text-sm text-slate-hint">
+      <span className="font-sans text-sm" style={{ color: "rgba(245,240,232,0.25)" }}>
         You&apos;re all caught up.
       </span>
     </div>

@@ -135,19 +135,25 @@ export default function CompanionPage() {
 
   return (
     <div
-      className="flex flex-col bg-cream-50"
+      className="flex flex-col bg-[#1A1A18]"
       style={{ minHeight: "calc(100vh - 3.5rem)" }}
     >
       <div className="flex flex-col flex-1 max-w-xl mx-auto w-full">
-        {/* ---------------------------------------------------------------- */}
-        {/* Header                                                            */}
-        {/* ---------------------------------------------------------------- */}
-        <div className="sticky top-0 z-10 flex items-start justify-between px-4 pt-6 pb-4 bg-cream-50/90 backdrop-blur border-b border-cream-200">
+        {/* Header */}
+        <div
+          className="sticky top-0 z-10 flex items-start justify-between px-4 pt-6 pb-4"
+          style={{
+            background: "rgba(26,26,24,0.90)",
+            backdropFilter: "blur(16px)",
+            WebkitBackdropFilter: "blur(16px)",
+            borderBottom: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
           <div>
-            <h1 className="font-serif text-xl font-[500] text-slate-warm">
+            <h1 className="font-display text-xl font-[400] text-grad-sage">
               Your companion
             </h1>
-            <p className="font-sans text-sm text-slate-muted mt-0.5">
+            <p className="font-sans text-sm mt-0.5" style={{ color: "rgba(245,240,232,0.35)" }}>
               A quiet space to check in
             </p>
           </div>
@@ -155,35 +161,34 @@ export default function CompanionPage() {
             <button
               type="button"
               onClick={handleClear}
-              className="font-sans text-xs text-slate-hint hover:text-slate-muted transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 rounded mt-1"
+              className="font-sans text-xs transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300 rounded mt-1"
+              style={{ color: "rgba(245,240,232,0.25)" }}
+              onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.45)"; }}
+              onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.25)"; }}
             >
               Clear conversation
             </button>
           )}
         </div>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* Messages area                                                     */}
-        {/* ---------------------------------------------------------------- */}
+        {/* Messages area */}
         <div
           className="flex-1 overflow-y-auto px-4 py-6 space-y-4"
           aria-live="polite"
           aria-label="Conversation"
         >
-          {/* Empty state */}
           {messages.length === 0 && (
             <div className="flex flex-col items-center justify-center h-full min-h-[300px] space-y-4 text-center">
               <LeafIllustration />
-              <p className="font-serif italic text-xl text-slate-warm">
+              <p className="font-display italic text-xl" style={{ color: "rgba(245,240,232,0.5)" }}>
                 How are you today?
               </p>
-              <p className="font-sans text-base text-slate-muted max-w-xs leading-[1.7]">
+              <p className="font-sans text-base max-w-xs leading-[1.7]" style={{ color: "rgba(245,240,232,0.3)" }}>
                 This is your space. No judgement, no metrics.
               </p>
             </div>
           )}
 
-          {/* Message bubbles, with crisis card inserted after first user message */}
           {messages.map((msg, idx) => (
             <div key={msg.id}>
               <CompanionMessage
@@ -192,7 +197,6 @@ export default function CompanionPage() {
                   isStreaming && idx === messages.length - 1 && msg.role === "assistant"
                 }
               />
-              {/* Insert crisis card after the triggering user message */}
               {showCrisisCard && idx === crisisTriggerIdx && (
                 <div className="mt-2">
                   <CrisisCard />
@@ -204,13 +208,16 @@ export default function CompanionPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* ---------------------------------------------------------------- */}
-        {/* Input area                                                        */}
-        {/* ---------------------------------------------------------------- */}
-        <div className="sticky bottom-0 border-t border-cream-200 bg-cream-50 px-4 py-4 space-y-2">
-          {/* Character count — only when approaching limit */}
+        {/* Input area */}
+        <div
+          className="sticky bottom-0 px-4 py-4 space-y-2"
+          style={{
+            background: "#222220",
+            borderTop: "1px solid rgba(255,255,255,0.06)",
+          }}
+        >
           {charCount > 400 && (
-            <p className="font-sans text-xs text-slate-hint text-right">
+            <p className="font-sans text-xs text-right" style={{ color: "rgba(245,240,232,0.25)" }}>
               {charCount}/500
             </p>
           )}
@@ -226,25 +233,30 @@ export default function CompanionPage() {
               rows={1}
               disabled={isStreaming}
               aria-label="Message input"
-              className="flex-1 resize-none rounded-xl bg-cream-100 px-4 py-3 font-sans text-base text-slate-warm placeholder:text-slate-hint border-0 focus:outline-none focus:ring-2 focus:ring-sage-200 disabled:opacity-50 leading-[1.7]"
-              style={{ maxHeight: "120px", overflowY: "auto" }}
+              className="flex-1 resize-none rounded-xl px-4 py-3 font-sans text-base leading-[1.7] border-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300 disabled:opacity-50"
+              style={{
+                background: "rgba(255,255,255,0.05)",
+                color: "#F5F0E8",
+                maxHeight: "120px",
+                overflowY: "auto",
+              }}
             />
             <button
               type="button"
               onClick={handleSend}
               disabled={!canSend}
               aria-label="Send message"
-              className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 disabled:cursor-not-allowed"
+              className="flex-shrink-0 flex items-center justify-center h-10 w-10 rounded-xl transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300 disabled:cursor-not-allowed"
             >
               <SendLeafIcon active={canSend} />
             </button>
           </div>
 
-          {/* Error message */}
           <AnimatePresence>
             {error && (
               <motion.p
-                className="font-sans text-sm text-amber-warm"
+                className="font-sans text-sm"
+                style={{ color: "#F2A65A" }}
                 initial={{ opacity: 0, y: 4 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0 }}

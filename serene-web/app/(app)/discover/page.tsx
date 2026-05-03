@@ -7,7 +7,6 @@ import { motion } from "framer-motion";
 import { PostCard } from "@/components/feed/post-card";
 import { FeedSkeleton } from "@/components/feed/feed-skeleton";
 import { EthicalAdCard } from "@/components/ads/ethical-ad-card";
-import { Heading, Body } from "@/components/ui/typography";
 import type { FeedPost } from "@/types/feed";
 import type { ServedAd } from "@/types/ads";
 
@@ -144,52 +143,46 @@ export default function DiscoverPage() {
 
   return (
     <div className="max-w-xl mx-auto px-4 pt-6 pb-16">
-      {/* ---- Header ---- */}
+      {/* Header */}
       <div className="mb-6 space-y-1">
-        <Heading as="h1" size="md">
+        <h1 className="font-display text-2xl font-[300]" style={{ color: "#F5F0E8" }}>
           A few things we thought you&apos;d enjoy
-        </Heading>
-        <Body muted className="text-sm">
+        </h1>
+        <p className="font-sans text-sm" style={{ color: "rgba(245,240,232,0.40)" }}>
           Curated just for you.
-        </Body>
+        </p>
         {refreshesAt && (
-          <p className="font-sans text-xs text-slate-hint">
+          <p className="font-sans text-xs" style={{ color: "rgba(245,240,232,0.20)" }}>
             Refreshes at {formatMidnight(refreshesAt)}
           </p>
         )}
       </div>
 
-      {/* "Already seen today" banner */}
+      {/* Already seen banner */}
       {alreadySeen && !isLoading && (
-        <div className="mb-4 rounded-lg bg-sage-100 px-4 py-3">
-          <p className="font-sans text-sm text-sage-600">
+        <div className="mb-4 rounded-lg px-4 py-3" style={{ background: "rgba(78,122,68,0.12)", border: "1px solid rgba(78,122,68,0.2)" }}>
+          <p className="font-sans text-sm" style={{ color: "rgba(138,189,128,0.8)" }}>
             You&apos;ve already explored today&apos;s picks.
           </p>
         </div>
       )}
 
-      {/* Loading */}
       {isLoading && <FeedSkeleton />}
 
-      {/* Error */}
       {!isLoading && error && (
         <div className="py-12 text-center">
-          <Body muted>{error}</Body>
+          <p className="font-sans text-base" style={{ color: "rgba(245,240,232,0.4)" }}>{error}</p>
         </div>
       )}
 
-      {/* Empty */}
       {!isLoading && !error && posts.length === 0 && (
         <div className="flex flex-col items-center text-center pt-16 space-y-4">
           <LeafIllustration />
-          <Heading as="h2" size="md">
-            Check back tomorrow
-          </Heading>
-          <Body muted>New discoveries arrive each day.</Body>
+          <h2 className="font-display text-xl font-[300]" style={{ color: "#F5F0E8" }}>Check back tomorrow</h2>
+          <p className="font-sans text-base" style={{ color: "rgba(245,240,232,0.40)" }}>New discoveries arrive each day.</p>
         </div>
       )}
 
-      {/* Post list with ad after 5th card */}
       {!isLoading && posts.length > 0 && (
         <motion.div
           className="space-y-4"
@@ -200,13 +193,11 @@ export default function DiscoverPage() {
           {posts.map((post, idx) => (
             <div key={post.id}>
               <PostCard post={post} />
-              {/* Insert ad slot after 5th post (index 4) — 1 ad per 10 posts (§10) */}
               {idx === 4 && <div className="mt-4"><AdSlot /></div>}
             </div>
           ))}
 
-          {/* End of discovery */}
-          <div className="flex items-center justify-center gap-2 py-8 text-slate-hint">
+          <div className="flex items-center justify-center gap-2 py-8" style={{ color: "rgba(245,240,232,0.20)" }}>
             <LeafSmall />
             <span className="font-sans text-sm">
               That&apos;s today&apos;s discovery. Come back tomorrow for more.

@@ -67,8 +67,8 @@ export function RestScreen() {
         }}
       />
 
-      {/* Semi-transparent sage overlay */}
-      <div className="absolute inset-0 bg-sage-800/60" />
+      {/* Semi-transparent dark overlay */}
+      <div className="absolute inset-0" style={{ background: "rgba(26,26,24,0.70)" }} />
 
       {/* Content */}
       <div className="relative z-10 flex flex-col items-center text-center max-w-sm px-8 py-12">

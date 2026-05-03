@@ -21,7 +21,7 @@ export default function AppLayout({
         <RestScreen />
         <DailyLimitScreen />
 
-        <div className="flex min-h-screen bg-cream-50">
+          <div className="flex min-h-screen bg-[#1A1A18]">
           <Navbar />
           {/*
             md:ml-64  — offset for desktop sidebar (w-64)

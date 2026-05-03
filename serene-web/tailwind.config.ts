@@ -10,7 +10,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        /* shadcn semantic tokens — consumed via CSS variables */
+        /* shadcn semantic tokens */
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
         card: { DEFAULT: 'hsl(var(--card))', foreground: 'hsl(var(--card-foreground))' },
@@ -23,17 +23,23 @@ const config: Config = {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-        /* Serene brand palette — use these directly in components */
+        /* Serene brand palette */
         cream: {
+          DEFAULT: '#F5F0E8',
+          2: '#EDE5D4',
           50: '#FDFBF7',
           100: '#F9F5EE',
           200: '#F0E9DA',
         },
         sage: {
+          50: '#EEF5EB',
           100: '#E8EFE4',
           200: '#C9DBC2',
+          300: '#8ABD80',
           400: '#87AA7E',
+          500: '#4E7A44',
           600: '#4E7A44',
+          700: '#2F5027',
           800: '#2C4827',
         },
         slate: {
@@ -49,7 +55,10 @@ const config: Config = {
         amber: {
           warm: '#F2A65A',
           glow: '#E8845A',
+          accent: '#D4883A',
         },
+        'bg-primary': '#1A1A18',
+        'bg-secondary': '#222220',
       },
       fontFamily: {
         serif: ['var(--font-instrument-serif)', 'Georgia', 'serif'],

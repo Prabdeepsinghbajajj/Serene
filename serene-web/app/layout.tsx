@@ -37,7 +37,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${instrumentSerif.variable} ${dmSans.variable} ${cormorantGaramond.variable}`}
+      className={`dark ${instrumentSerif.variable} ${dmSans.variable} ${cormorantGaramond.variable}`}
     >
       <body>{children}</body>
     </html>

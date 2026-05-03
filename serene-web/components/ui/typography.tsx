@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 
 type HeadingLevel = "h1" | "h2" | "h3" | "h4";
 type HeadingSize = "xl" | "lg" | "md" | "sm";
+type HeadingVariant = "dark" | "light";
 
 const headingSizeMap: Record<HeadingSize, string> = {
   xl: "text-4xl",
@@ -17,6 +18,7 @@ const headingSizeMap: Record<HeadingSize, string> = {
 interface HeadingProps {
   as?: HeadingLevel;
   size?: HeadingSize;
+  variant?: HeadingVariant;
   className?: string;
   children: React.ReactNode;
 }
@@ -24,14 +26,16 @@ interface HeadingProps {
 export function Heading({
   as: Tag = "h2",
   size = "lg",
+  variant = "dark",
   className,
   children,
 }: HeadingProps) {
   return (
     <Tag
       className={cn(
-        "font-serif font-medium text-slate-warm leading-tight",
+        "font-serif font-medium leading-tight",
         headingSizeMap[size],
+        variant === "dark" ? "text-cream" : "text-slate-warm",
         className
       )}
     >

@@ -3,86 +3,188 @@
 @tailwind utilities;
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
+  .text-balance { text-wrap: balance; }
 }
 
-/* Phone mockup float animation — used on landing page only */
+/* =========================================================================
+   DESIGN TOKENS
+   ========================================================================= */
+:root {
+  /* Dark theme (default) */
+  --bg-primary: #1A1A18;
+  --bg-secondary: #222220;
+  --bg-card: rgba(255, 255, 255, 0.03);
+  --bg-card-hover: rgba(255, 255, 255, 0.05);
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-accent: rgba(78, 122, 68, 0.25);
+
+  /* Cream */
+  --cream: #F5F0E8;
+  --cream-2: #EDE5D4;
+
+  /* Sage */
+  --sage-50: #EEF5EB;
+  --sage-100: #D0E8C8;
+  --sage-300: #8ABD80;
+  --sage-500: #4E7A44;
+  --sage-700: #2F5027;
+
+  /* Text */
+  --text-primary: #F5F0E8;
+  --text-muted: rgba(245, 240, 232, 0.5);
+  --text-hint: rgba(245, 240, 232, 0.25);
+
+  /* Accent */
+  --amber: #D4883A;
+  --teal: #3A7A74;
+
+  /* Gradients */
+  --grad-sage: linear-gradient(135deg, #A8D89E, #4E7A44);
+  --grad-hero: linear-gradient(135deg, #A8D89E 0%, #4E7A44 50%, #D4883A 100%);
+  --grad-card: linear-gradient(135deg, rgba(78,122,68,0.12), rgba(78,122,68,0.04));
+
+  /* shadcn tokens — light (unused in app but kept for landing cream sections) */
+  --background: 43 60% 97%;
+  --foreground: 40 4% 29%;
+  --card: 40 43% 96%;
+  --card-foreground: 40 4% 29%;
+  --popover: 43 60% 97%;
+  --popover-foreground: 40 4% 29%;
+  --primary: 114 20% 39%;
+  --primary-foreground: 110 32% 94%;
+  --secondary: 110 25% 89%;
+  --secondary-foreground: 114 25% 22%;
+  --muted: 40 30% 92%;
+  --muted-foreground: 40 4% 48%;
+  --accent: 110 25% 89%;
+  --accent-foreground: 114 25% 22%;
+  --destructive: 0 60% 45%;
+  --destructive-foreground: 43 60% 97%;
+  --border: 40 20% 82%;
+  --input: 40 20% 82%;
+  --ring: 114 20% 39%;
+  --radius: 0.75rem;
+}
+
+/* shadcn dark mode — activated by class="dark" on <html> */
+.dark {
+  --background: 26 5% 10%;        /* #1A1A18 */
+  --foreground: 37 30% 93%;       /* #F5F0E8 */
+  --card: 27 5% 13%;              /* #222220 */
+  --card-foreground: 37 30% 93%;
+  --popover: 26 5% 10%;
+  --popover-foreground: 37 30% 93%;
+  --primary: 112 24% 59%;         /* sage-300 #8ABD80 */
+  --primary-foreground: 26 5% 10%;
+  --secondary: 0 0% 100% / 0.05;
+  --secondary-foreground: 37 30% 93%;
+  --muted: 0 0% 100% / 0.03;
+  --muted-foreground: 37 15% 65%;
+  --accent: 112 24% 59% / 0.15;
+  --accent-foreground: 37 30% 93%;
+  --destructive: 0 55% 50%;
+  --destructive-foreground: 37 30% 93%;
+  --border: 0 0% 100% / 0.07;
+  --input: 0 0% 100% / 0.05;
+  --ring: 112 24% 59%;
+}
+
+/* =========================================================================
+   GRADIENT TEXT UTILITIES
+   ========================================================================= */
+.text-grad-sage {
+  background: var(--grad-sage);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.text-grad-hero {
+  background: var(--grad-hero);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* =========================================================================
+   NOISE OVERLAY — subtle film grain on dark bg (§6 compliant — no harsh fx)
+   ========================================================================= */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  opacity: 0.022;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* =========================================================================
+   ANIMATIONS
+   ========================================================================= */
+
+/* Legacy float (kept for backward compat) */
 @keyframes float {
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-14px); }
 }
+.float-animation { animation: float 4.5s ease-in-out infinite; }
 
-.float-animation {
-  animation: float 4.5s ease-in-out infinite;
+/* Phone mockup */
+@keyframes phoneFloat {
+  0%, 100% { transform: rotate(-1.5deg) translateY(0); }
+  50%       { transform: rotate(-1.5deg) translateY(-16px); }
+}
+.phone-float { animation: phoneFloat 6s ease-in-out infinite; }
+
+/* Mesh blobs */
+@keyframes blobMove {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%       { transform: translate(30px, -20px) scale(1.05); }
+  50%       { transform: translate(-20px, 30px) scale(0.95); }
+  75%       { transform: translate(20px, 20px) scale(1.08); }
+}
+.blob {
+  animation: blobMove 14s ease-in-out infinite;
+  border-radius: 50%;
+  filter: blur(80px);
+  position: absolute;
+  pointer-events: none;
 }
 
-@layer base {
-  :root {
-    --background: 43 60% 97%;           /* cream-50  #FDFBF7 */
-    --foreground: 40 4% 29%;            /* slate-warm #4A4A45 */
-    --card: 40 43% 96%;                 /* cream-100 #F9F5EE */
-    --card-foreground: 40 4% 29%;
-    --popover: 43 60% 97%;
-    --popover-foreground: 40 4% 29%;
-    --primary: 114 20% 39%;             /* sage-600  #4E7A44 */
-    --primary-foreground: 110 32% 94%; /* sage-100  #E8EFE4 */
-    --secondary: 110 25% 89%;          /* sage-100  #E8EFE4 */
-    --secondary-foreground: 114 25% 22%; /* sage-800 #2C4827 */
-    --muted: 40 30% 92%;               /* cream-200 #F0E9DA */
-    --muted-foreground: 40 4% 48%;     /* slate-muted #7A7A74 */
-    --accent: 110 25% 89%;
-    --accent-foreground: 114 25% 22%;
-    --destructive: 0 60% 45%;
-    --destructive-foreground: 43 60% 97%;
-    --border: 40 20% 82%;
-    --input: 40 20% 82%;
-    --ring: 114 20% 39%;
-    --radius: 0.75rem;
-  }
+/* Marquee */
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track { animation: marquee 25s linear infinite; }
 
-  .dark {
-    --background: 40 8% 12%;
-    --foreground: 40 30% 88%;
-    --card: 40 8% 16%;
-    --card-foreground: 40 30% 88%;
-    --popover: 40 8% 12%;
-    --popover-foreground: 40 30% 88%;
-    --primary: 114 20% 55%;
-    --primary-foreground: 114 25% 14%;
-    --secondary: 114 12% 22%;
-    --secondary-foreground: 110 25% 85%;
-    --muted: 40 8% 20%;
-    --muted-foreground: 40 4% 58%;
-    --accent: 114 12% 22%;
-    --accent-foreground: 110 25% 85%;
-    --destructive: 0 55% 50%;
-    --destructive-foreground: 43 60% 97%;
-    --border: 40 8% 24%;
-    --input: 40 8% 24%;
-    --ring: 114 20% 55%;
-  }
+/* Grid lines background */
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  background-size: 80px 80px;
 }
 
+/* =========================================================================
+   BASE STYLES
+   ========================================================================= */
 @layer base {
-  * {
-    @apply border-border;
-  }
+  * { @apply border-border; }
+
   body {
-    @apply bg-cream-50 text-slate-warm font-sans;
+    background-color: #1A1A18;
+    color: #F5F0E8;
+    font-family: var(--font-dm-sans), system-ui, sans-serif;
     font-size: 1rem;
     line-height: 1.7;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
+
   h1, h2, h3, h4, h5, h6 {
     @apply font-serif;
-    font-weight: 500; /* bible §6: headings are weight 500 ONLY, never 700 */
+    font-weight: 500;
     line-height: 1.2;
-  }
-  /* Prevent pure black/white per bible §6 */
-  :root {
-    color-scheme: light dark;
   }
 }

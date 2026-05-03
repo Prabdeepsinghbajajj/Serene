@@ -8,7 +8,6 @@ import Link from "next/link";
 import { Lock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Heading, Body } from "@/components/ui/typography";
 import { FollowButton } from "@/components/profile/follow-button";
 import { PostGrid } from "@/components/profile/post-grid";
 
@@ -81,12 +80,11 @@ export default function ProfilePage() {
       .finally(() => setIsLoading(false));
   }, [username]);
 
-  /* Loading */
   if (isLoading) {
     return (
       <div className="max-w-xl mx-auto">
         <ProfileHeaderSkeleton />
-        <div className="border-t border-cream-200 mt-2">
+        <div className="mt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}>
           <div className="grid grid-cols-3 gap-1 sm:gap-2 p-4">
             {Array.from({ length: 9 }).map((_, i) => (
               <Skeleton key={i} className="aspect-square w-full rounded-sm" />
@@ -97,17 +95,13 @@ export default function ProfilePage() {
     );
   }
 
-  /* Error / not found */
   if (error || !data) {
     return (
       <div className="max-w-xl mx-auto pt-20 text-center px-4 space-y-4">
-        <Heading as="h1" size="md">
+        <h1 className="font-display text-xl font-[300]" style={{ color: "#F5F0E8" }}>
           {error === "not_found" ? "Profile not found" : "Something went wrong"}
-        </Heading>
-        <Link
-          href="/feed"
-          className="font-sans text-sm text-sage-600 hover:underline"
-        >
+        </h1>
+        <Link href="/feed" className="font-sans text-sm text-sage-300 hover:text-sage-100">
           Back to feed
         </Link>
       </div>
@@ -116,33 +110,30 @@ export default function ProfilePage() {
 
   const { profile, is_following, is_own_profile, private_stats } = data;
   const initials = profile.display_name
-    .split(" ")
-    .map((w) => w[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
+    .split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
   return (
     <div className="max-w-xl mx-auto">
-      {/* ---- Profile header ---- */}
+      {/* Profile header */}
       <div className="px-4 pt-8 pb-4 space-y-4">
         <div className="flex gap-4 items-start">
-          {/* Avatar */}
           <Avatar className="h-20 w-20 flex-shrink-0">
             {profile.avatar_url && (
               <AvatarImage src={profile.avatar_url} alt={profile.display_name} />
             )}
-            <AvatarFallback className="bg-sage-200 text-sage-800 font-sans text-xl">
+            <AvatarFallback
+              className="font-sans text-xl"
+              style={{ background: "rgba(78,122,68,0.2)", color: "#8ABD80" }}
+            >
               {initials}
             </AvatarFallback>
           </Avatar>
 
-          {/* Name + username + follow button */}
           <div className="flex-1 min-w-0 space-y-1 pt-1">
-            <h1 className="font-serif text-2xl font-[500] text-slate-warm leading-tight truncate">
+            <h1 className="font-display text-2xl font-[300] leading-tight truncate" style={{ color: "#F5F0E8" }}>
               {profile.display_name}
             </h1>
-            <p className="font-sans text-sm text-slate-muted">
+            <p className="font-sans text-sm" style={{ color: "rgba(245,240,232,0.40)" }}>
               @{profile.username}
             </p>
 
@@ -157,24 +148,19 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Bio */}
         {profile.bio && (
-          <Body className="text-slate-warm line-clamp-2">{profile.bio}</Body>
+          <p className="font-sans text-base leading-[1.7] line-clamp-2" style={{ color: "rgba(245,240,232,0.60)" }}>
+            {profile.bio}
+          </p>
         )}
 
-        {/*
-          Private stats — only rendered when viewer IS the owner (§6, §11).
-          NEVER shown to visitors. Lock icon signals these are private.
-        */}
         {is_own_profile && private_stats && (
           <div className="flex items-center gap-1.5 pt-1">
-            <Lock size={12} className="text-slate-hint flex-shrink-0" aria-hidden="true" />
-            <p className="font-sans text-sm text-slate-muted">
-              {private_stats.post_count} post
-              {private_stats.post_count !== 1 ? "s" : ""}{" "}
+            <Lock size={12} aria-hidden="true" style={{ color: "rgba(245,240,232,0.25)", flexShrink: 0 }} />
+            <p className="font-sans text-sm" style={{ color: "rgba(245,240,232,0.30)" }}>
+              {private_stats.post_count} post{private_stats.post_count !== 1 ? "s" : ""}{" "}
               &middot;{" "}
-              {private_stats.follower_count} follower
-              {private_stats.follower_count !== 1 ? "s" : ""}{" "}
+              {private_stats.follower_count} follower{private_stats.follower_count !== 1 ? "s" : ""}{" "}
               &middot;{" "}
               {private_stats.following_count} following
             </p>
@@ -182,10 +168,8 @@ export default function ProfilePage() {
         )}
       </div>
 
-      {/* ---- Divider ---- */}
-      <div className="border-t border-cream-200" />
+      <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }} />
 
-      {/* ---- Post grid ---- */}
       <div className="pt-2">
         <PostGrid username={username} isOwnProfile={is_own_profile} />
       </div>

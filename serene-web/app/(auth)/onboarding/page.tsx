@@ -10,7 +10,6 @@ import { Loader2, ChevronLeft, Check } from "lucide-react";
 
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import { Heading, Body } from "@/components/ui/typography";
 import type { PersonalityType } from "@/types/database";
 
 /* -------------------------------------------------------------------------- */
@@ -179,26 +178,24 @@ export default function OnboardingPage() {
     }
   }
 
-  /* ---------- Step dots ---------- */
   const dots = (
     <div className="flex justify-center gap-2 mb-10">
       {[1, 2, 3].map((n) => (
         <div
           key={n}
-          className={`h-2 w-2 rounded-full transition-colors duration-300 ${
-            n === step ? "bg-sage-400" : "bg-cream-200"
-          }`}
+          className="h-2 w-2 rounded-full transition-colors duration-300"
+          style={{ background: n === step ? "#8ABD80" : "rgba(255,255,255,0.15)" }}
           aria-hidden="true"
         />
       ))}
     </div>
   );
 
-  /* ---------- Back button ---------- */
   const backButton = step > 1 && (
     <button
       onClick={() => goToStep((step - 1) as 1 | 2 | 3)}
-      className="flex items-center gap-1 font-sans text-sm text-slate-muted hover:text-slate-warm transition-colors mb-6"
+      className="flex items-center gap-1 font-sans text-sm transition-colors mb-6"
+      style={{ color: "rgba(245,240,232,0.35)" }}
       type="button"
     >
       <ChevronLeft className="h-4 w-4" />
@@ -207,7 +204,7 @@ export default function OnboardingPage() {
   );
 
   return (
-    <main className="min-h-screen bg-cream-50 flex items-center justify-center px-8 py-16">
+    <main className="min-h-screen flex items-center justify-center px-8 py-16" style={{ background: "#1A1A18" }}>
       <div className="w-full max-w-md">
         {dots}
 
@@ -221,18 +218,16 @@ export default function OnboardingPage() {
             exit="exit"
             transition={{ duration: 0.3, ease: "easeOut" }}
           >
-            {/* ============================================================ */}
-            {/* STEP 1 — Personality                                          */}
-            {/* ============================================================ */}
+            {/* STEP 1 — Personality */}
             {step === 1 && (
               <div className="space-y-8">
                 <div className="space-y-2">
-                  <Heading as="h1" size="lg">
+                  <h1 className="font-display text-3xl font-[300]" style={{ color: "#F5F0E8" }}>
                     What brings you to Serene?
-                  </Heading>
-                  <Body muted>
+                  </h1>
+                  <p className="font-sans text-base" style={{ color: "rgba(245,240,232,0.45)" }}>
                     This helps us make your space feel like yours.
-                  </Body>
+                  </p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3">
@@ -241,51 +236,41 @@ export default function OnboardingPage() {
                       key={opt.value}
                       type="button"
                       onClick={() => setPersonality(opt.value)}
-                      className={`relative text-left rounded-xl p-4 border-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 ${
-                        personality === opt.value
-                          ? "border-sage-400 bg-sage-100 scale-[1.02]"
-                          : "border-transparent bg-cream-100 hover:border-cream-200"
-                      }`}
+                      className="relative text-left rounded-xl p-4 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300"
+                      style={{
+                        background: personality === opt.value ? "rgba(78,122,68,0.15)" : "rgba(255,255,255,0.03)",
+                        border: personality === opt.value ? "2px solid rgba(138,189,128,0.4)" : "2px solid rgba(255,255,255,0.07)",
+                        transform: personality === opt.value ? "scale(1.02)" : "scale(1)",
+                      }}
                     >
                       {personality === opt.value && (
-                        <span className="absolute top-2.5 right-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-sage-600">
+                        <span className="absolute top-2.5 right-2.5 flex h-5 w-5 items-center justify-center rounded-full"
+                          style={{ background: "linear-gradient(135deg, #5E9A52, #3A6032)" }}>
                           <Check size={11} className="text-white" aria-hidden="true" />
                         </span>
                       )}
                       <span className="text-2xl block mb-2">{opt.emoji}</span>
-                      <span className="block font-sans font-medium text-slate-warm text-sm leading-tight">
+                      <span className="block font-sans font-medium text-sm leading-tight" style={{ color: "#F5F0E8" }}>
                         {opt.label}
                       </span>
-                      <span className="block font-sans text-xs text-slate-muted mt-0.5">
+                      <span className="block font-sans text-xs mt-0.5" style={{ color: "rgba(245,240,232,0.40)" }}>
                         {opt.description}
                       </span>
                     </button>
                   ))}
                 </div>
 
-                {personality && (
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    onClick={() => goToStep(2)}
-                  >
-                    Continue
-                  </Button>
-                )}
+                {personality && <Button className="w-full" size="lg" onClick={() => goToStep(2)}>Continue</Button>}
               </div>
             )}
 
-            {/* ============================================================ */}
-            {/* STEP 2 — Time preference                                      */}
-            {/* ============================================================ */}
+            {/* STEP 2 — Time preference */}
             {step === 2 && (
               <div className="space-y-8">
                 {backButton}
-                <div className="space-y-2">
-                  <Heading as="h1" size="lg">
-                    When do you usually have a quiet moment?
-                  </Heading>
-                </div>
+                <h1 className="font-display text-3xl font-[300]" style={{ color: "#F5F0E8" }}>
+                  When do you usually have a quiet moment?
+                </h1>
 
                 <div className="grid grid-cols-2 gap-3">
                   {timeOptions.map((opt) => (
@@ -293,111 +278,79 @@ export default function OnboardingPage() {
                       key={opt.value}
                       type="button"
                       onClick={() => setTimePreference(opt.value)}
-                      className={`relative text-left rounded-xl p-4 border-2 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 ${
-                        timePreference === opt.value
-                          ? "border-sage-400 bg-sage-100 scale-[1.02]"
-                          : "border-transparent bg-cream-100 hover:border-cream-200"
-                      }`}
+                      className="relative text-left rounded-xl p-4 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300"
+                      style={{
+                        background: timePreference === opt.value ? "rgba(78,122,68,0.15)" : "rgba(255,255,255,0.03)",
+                        border: timePreference === opt.value ? "2px solid rgba(138,189,128,0.4)" : "2px solid rgba(255,255,255,0.07)",
+                        transform: timePreference === opt.value ? "scale(1.02)" : "scale(1)",
+                      }}
                     >
                       {timePreference === opt.value && (
-                        <span className="absolute top-2.5 right-2.5 flex h-5 w-5 items-center justify-center rounded-full bg-sage-600">
+                        <span className="absolute top-2.5 right-2.5 flex h-5 w-5 items-center justify-center rounded-full"
+                          style={{ background: "linear-gradient(135deg, #5E9A52, #3A6032)" }}>
                           <Check size={11} className="text-white" aria-hidden="true" />
                         </span>
                       )}
                       <span className="text-2xl block mb-2">{opt.emoji}</span>
-                      <span className="block font-sans font-medium text-slate-warm text-sm">
+                      <span className="block font-sans font-medium text-sm" style={{ color: "#F5F0E8" }}>
                         {opt.label}
                       </span>
                     </button>
                   ))}
                 </div>
 
-                {timePreference && (
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    onClick={() => goToStep(3)}
-                  >
-                    Continue
-                  </Button>
-                )}
+                {timePreference && <Button className="w-full" size="lg" onClick={() => goToStep(3)}>Continue</Button>}
               </div>
             )}
 
-            {/* ============================================================ */}
-            {/* STEP 3 — Avatar                                               */}
-            {/* ============================================================ */}
+            {/* STEP 3 — Avatar */}
             {step === 3 && (
               <div className="space-y-8">
                 {backButton}
                 <div className="space-y-2">
-                  <Heading as="h1" size="lg">
+                  <h1 className="font-display text-3xl font-[300]" style={{ color: "#F5F0E8" }}>
                     Add a photo — or skip for now
-                  </Heading>
-                  <Body muted>
+                  </h1>
+                  <p className="font-sans text-base" style={{ color: "rgba(245,240,232,0.45)" }}>
                     You can always add one later from your profile.
-                  </Body>
+                  </p>
                 </div>
 
-                {/* Avatar upload zone */}
                 <div className="flex flex-col items-center gap-4">
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="h-[120px] w-[120px] rounded-full border-2 border-dashed border-cream-200 bg-cream-100 hover:border-sage-400 hover:bg-sage-100 transition-all overflow-hidden flex items-center justify-center focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400"
+                    className="h-[120px] w-[120px] rounded-full overflow-hidden flex items-center justify-center transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300"
+                    style={{
+                      border: "2px dashed rgba(138,189,128,0.3)",
+                      background: avatarPreview ? "transparent" : "rgba(255,255,255,0.03)",
+                    }}
                     aria-label="Upload profile photo"
                   >
                     {avatarPreview ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={avatarPreview}
-                        alt="Avatar preview"
-                        className="h-full w-full object-cover"
-                      />
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={avatarPreview} alt="Avatar preview" className="h-full w-full object-cover" />
                     ) : (
-                      <span className="font-sans text-sm text-slate-muted text-center px-3">
+                      <span className="font-sans text-sm text-center px-3" style={{ color: "rgba(245,240,232,0.35)" }}>
                         Tap to add photo
                       </span>
                     )}
                   </button>
-
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="sr-only"
-                    onChange={handleAvatarChange}
-                  />
+                  <input ref={fileInputRef} type="file" accept="image/*" className="sr-only" onChange={handleAvatarChange} />
                 </div>
 
-                {saveError && (
-                  <p className="text-sm text-destructive text-center">
-                    {saveError}
-                  </p>
-                )}
+                {saveError && <p className="text-sm text-destructive text-center">{saveError}</p>}
 
                 <div className="space-y-3">
-                  <Button
-                    className="w-full"
-                    size="lg"
-                    onClick={() => handleFinish(false)}
-                    disabled={saving}
-                  >
-                    {saving ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Setting up your space…
-                      </>
-                    ) : (
-                      "Finish"
-                    )}
+                  <Button className="w-full" size="lg" onClick={() => handleFinish(false)} disabled={saving}>
+                    {saving ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Setting up your space…</> : "Finish"}
                   </Button>
-
                   <button
                     type="button"
                     onClick={() => handleFinish(true)}
                     disabled={saving}
-                    className="w-full font-sans text-sm text-slate-muted hover:text-slate-warm transition-colors text-center"
+                    className="w-full font-sans text-sm text-center transition-colors"
+                    style={{ color: "rgba(245,240,232,0.30)" }}
                   >
                     Skip for now
                   </button>
