@@ -19,8 +19,8 @@ BEGIN
       'user_' || substr(NEW.id::text, 1, 8)
     ),
     COALESCE(
-      NEW.raw_user_meta_data->>'display_name',
-      NEW.raw_user_meta_data->>'full_name',  -- populated by Google OAuth
+      NEW.raw_user_meta_data->>'full_name',    -- populated by Google OAuth
+      NEW.raw_user_meta_data->>'display_name', -- populated by email signup
       'New member'
     ),
     false  -- onboarding_completed: user must complete onboarding flow
