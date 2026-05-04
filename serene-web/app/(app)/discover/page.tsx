@@ -142,20 +142,15 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="max-w-xl mx-auto px-4 pt-6 pb-16">
+    <div className="max-w-2xl mx-auto px-4 pt-6 pb-16">
       {/* Header */}
       <div className="mb-6 space-y-1">
-        <h1 className="font-display text-2xl font-[300]" style={{ color: "#F5F0E8" }}>
-          A few things we thought you&apos;d enjoy
+        <h1 className="font-display text-3xl font-[300]" style={{ color: "#F5F0E8" }}>
+          Today&apos;s discoveries
         </h1>
-        <p className="font-sans text-sm" style={{ color: "rgba(245,240,232,0.40)" }}>
-          Curated just for you.
+        <p className="font-sans text-xs" style={{ color: "rgba(245,240,232,0.25)" }}>
+          Refreshes at midnight{refreshesAt ? ` · ${formatMidnight(refreshesAt)}` : ""}
         </p>
-        {refreshesAt && (
-          <p className="font-sans text-xs" style={{ color: "rgba(245,240,232,0.20)" }}>
-            Refreshes at {formatMidnight(refreshesAt)}
-          </p>
-        )}
       </div>
 
       {/* Already seen banner */}

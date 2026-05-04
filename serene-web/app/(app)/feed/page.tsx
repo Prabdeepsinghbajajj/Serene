@@ -111,7 +111,7 @@ export default function FeedPage() {
   }, []);
 
   return (
-    <div className="max-w-xl mx-auto px-4 pt-8 pb-8">
+    <div className="max-w-2xl mx-auto px-4 pt-8 pb-8">
       <FeedGreeting />
 
       {/* Loading */}

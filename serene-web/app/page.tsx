@@ -122,13 +122,17 @@ export default function LandingPage() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-8">
-          {["About", "Wellness", "Companion"].map((item) => (
+          {[
+            { label: "Why Serene", href: "#about" },
+            { label: "Wellness", href: "#wellness" },
+            { label: "Companion", href: "#companion" },
+          ].map(({ label, href }) => (
             <a
-              key={item}
-              href={`#${item.toLowerCase()}`}
+              key={label}
+              href={href}
               className="font-sans text-xs uppercase tracking-[0.12em] text-white/40 hover:text-white/70 transition-colors"
             >
-              {item}
+              {label}
             </a>
           ))}
         </nav>
@@ -179,9 +183,13 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
           >
-            {["About", "Wellness", "Companion"].map((item) => (
-              <a key={item} href={`#${item.toLowerCase()}`} className="block font-sans text-sm text-white/60 py-1" onClick={() => setMenuOpen(false)}>
-                {item}
+            {[
+              { label: "Why Serene", href: "#about" },
+              { label: "Wellness", href: "#wellness" },
+              { label: "Companion", href: "#companion" },
+            ].map(({ label, href }) => (
+              <a key={label} href={href} className="block font-sans text-sm text-white/60 py-1" onClick={() => setMenuOpen(false)}>
+                {label}
               </a>
             ))}
             <div className="flex flex-col gap-3 pt-2 border-t border-white/[0.06]">
@@ -364,7 +372,7 @@ export default function LandingPage() {
                     className="relative"
                     style={{
                       height: 200,
-                      background: "linear-gradient(135deg, #2F5027, #87AA7E, #D4883A)",
+                      background: "linear-gradient(135deg, #1A2818 0%, #2A4A30 25%, #4E6A3A 50%, #8A7A40 75%, #C8953A 100%)",
                     }}
                   >
                     {/* Mood pill */}

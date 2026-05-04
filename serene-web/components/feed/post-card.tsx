@@ -11,22 +11,21 @@ import type { FeedPost } from "@/types/feed";
 /*  Inline leaf icon                                                            */
 /* -------------------------------------------------------------------------- */
 function LeafIcon({ filled }: { filled: boolean }) {
+  const color = filled ? "#8ABD80" : "rgba(245,240,232,0.25)";
   return (
-    <svg width="20" height="20" viewBox="0 0 24 24" aria-hidden="true">
-      <path
-        d="M12 22C7 22 3 17.5 3 12C3 6.5 7.5 2 12 2C16.5 2 21 6.5 21 12C21 17.5 17 22 12 22Z"
-        fill={filled ? "#8ABD80" : "none"}
-        stroke={filled ? "#8ABD80" : "rgba(245,240,232,0.25)"}
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-      <path
-        d="M12 21C12 21 12 9 12 4"
-        stroke={filled ? "#4E7A44" : "rgba(245,240,232,0.25)"}
-        strokeWidth="1"
-        strokeLinecap="round"
-        opacity="0.7"
-      />
+    <svg
+      width="18"
+      height="18"
+      viewBox="0 0 24 24"
+      fill={filled ? "#8ABD80" : "none"}
+      stroke={color}
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.5 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z" />
+      <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12" />
     </svg>
   );
 }
