@@ -61,8 +61,7 @@ const config: Config = {
         'bg-secondary': '#222220',
       },
       fontFamily: {
-        serif: ['var(--font-instrument-serif)', 'Georgia', 'serif'],
-        sans: ['var(--font-dm-sans)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
         display: ['var(--font-cormorant)', 'Georgia', 'serif'],
         mono: ['ui-monospace', 'monospace'],
       },
