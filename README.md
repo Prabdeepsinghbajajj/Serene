@@ -1,178 +1,246 @@
 <div align="center">
-
-<br />
-
-# 🌿 Serene
-
-### A social platform that gently asks you to put your phone down.
-
-<br />
-
-*Share what matters. Scroll less. Feel better.*
-
-<br />
-
-[![Next.js](https://img.shields.io/badge/Next.js_14-black?style=flat-square&logo=next.js)](https://nextjs.org)
-[![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat-square&logo=typescript&logoColor=white)](https://typescriptlang.org)
-[![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=flat-square&logo=supabase&logoColor=white)](https://supabase.com)
-[![Anthropic](https://img.shields.io/badge/Claude_AI-D97706?style=flat-square)](https://anthropic.com)
-[![Vercel](https://img.shields.io/badge/Vercel-black?style=flat-square&logo=vercel)](https://vercel.com)
-
+  <img src="assets/banner.svg" width="100%" alt="Serene — A new kind of social"/>
 </div>
 
----
-
-<br />
-
-## What is Serene?
-
-Serene is a social media platform — photos, videos, posts, profiles, follows — but built around a completely different goal than every other social app that exists today.
-
-**Every other platform is designed to keep you scrolling as long as possible.**
-
-Serene is designed to do the opposite.
-
-No endless feed. No public like counts. No algorithmic pressure to post more, engage more, or grow your audience. No ads that follow you around the internet. An AI that actively encourages you to log off.
-
-> *"If a feature increases engagement at the cost of user wellbeing, the feature is wrong — not the measurement."*
-
-<br />
-
----
-
-<br />
-
-## The Core Idea
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-### 😤 Every other social app
-- Feed never ends
-- You see how many people liked your post
-- Algorithm surfaces whatever keeps you watching
-- Ads follow you based on your behaviour everywhere
-- Notifications designed to pull you back in
-- No way to know how long you've been scrolling
-
-</td>
-<td width="50%" valign="top">
-
-### 🌿 Serene
-- Feed ends at 30 posts per day — by design
-- Only *you* see your own resonance counts
-- Feed is curated around your mood and interests
-- Ads come from a fixed ethical whitelist only
-- No notifications for likes, milestones, or "you haven't posted in X days"
-- Built-in session timer with gentle rest prompts
-
-</td>
-</tr>
-</table>
-
-<br />
-
----
-
-<br />
-
-## Key Features
-
-<br />
-
-### 🌱 &nbsp; The Wellness Engine
-
-Serene actively manages how long you spend on it. As your session progresses, the app gently intervenes — never with guilt, always with care.
-
-- **20 minutes in** — a soft banner appears at the top of your feed. One tap to dismiss. No pressure.
-- **40 minutes in** — the feed blurs and a full-screen rest moment appears. A breathing exercise plays. You can choose to keep browsing after 5 seconds, or step away.
-- **60 minutes in** — the feed pauses for 10 minutes. A breathing exercise fills the screen.
-- **30 posts seen** — your daily feed ends. A warm message appears. The content will still be there tomorrow.
-
-<br />
-
-### 🧭 &nbsp; A Feed That Respects You
-
-The Serene feed has never heard of "viral". Posts are surfaced based on:
-
-- How close you are to the person who posted
-- Whether the mood of the post fits your personality and the time of day
-- How recently it was shared (posts older than 48 hours disappear entirely)
-- A small element of serendipity — something unexpected, every day
-
-No post is ever ranked by how many likes it got. No post goes "viral" on Serene.
-
-<br />
-
-### 🍃 &nbsp; Your AI Companion
-
-Every post you share gets a personal note from your companion — powered by Claude AI. It doesn't say *"Great photo!"*. It notices the actual light in your picture, the specific detail you chose to share, the feeling in your words.
-
-The companion also checks in on you in a private chat. Not as a therapist — as a grounding presence. It asks one question at a time. It redirects gently toward the present moment. And if you're ever in real distress, it immediately provides crisis resources.
-
-The companion's goal is to make you feel seen — and then encourage you to close the app.
-
-<br />
-
-### ✦ &nbsp; Today's Discoveries
-
-A separate tab that shows 10 posts from people you don't follow yet, curated to your interests and personality. It refreshes once at midnight. There's no "load more". That's the whole point.
-
-<br />
-
-### 📣 &nbsp; Ethical Advertising
-
-Serene does carry advertising — but from a fixed list of approved categories only. Things like yoga studios, cookware, books, hiking gear, art supplies, and local community events.
-
-What's permanently blocked: fast fashion, gambling, alcohol, weight-loss products, beauty filters, anything marketed with "get more followers" or "go viral", and any ad that uses countdown timers or urgency tactics.
-
-Targeting is based only on your personality type and the time of day — never on your behaviour outside Serene, never on demographic data.
-
-<br />
-
----
-
-<br />
-
-## The Design
-
-Serene has a distinctive dark, calm aesthetic. Deep slate backgrounds. Warm cream text. Sage green accents. Subtle animations that feel like breathing, not bouncing.
-
-The typography is intentional — Cormorant Garamond for headings and the companion's voice (it feels like a handwritten letter), DM Sans for everything else (clear, readable, never harsh).
-
-There are no red notification dots anywhere in the app. There are no follower counts visible to other users. There are no trending sections. Cards never show engagement numbers. The interface is designed to feel like a quiet room, not a busy marketplace.
-
-<br />
-
----
-
-<br />
-
-## The Philosophy
-
-Most social platforms measure success in **time spent** and **actions taken**.
-
-Serene measures success in **how you feel when you close it**.
-
-The platform is not trying to become part of your daily habit in the way other apps are. It doesn't want to be the first thing you reach for in the morning. It doesn't send you push notifications to remind you it exists. It isn't designed to trigger FOMO.
-
-It is designed to be a calm, beautiful place to share moments with people you care about — and then let you get back to your life.
-
-<br />
-
----
-
-<br />
+<br/>
 
 <div align="center">
 
-*Built with care. Designed to be put down.*
+  <a href="https://www.serene.network">
+    <img src="https://img.shields.io/badge/%F0%9F%8C%BF_Live_App-www.serene.network-4E7A44?style=for-the-badge&labelColor=1A1A18" alt="Live App"/>
+  </a>
+  &nbsp;
+  <img src="https://img.shields.io/badge/Next.js_14-1A1A18?style=for-the-badge&logo=next.js&logoColor=8ABD80" alt="Next.js"/>
+  &nbsp;
+  <img src="https://img.shields.io/badge/TypeScript-1A1A18?style=for-the-badge&logo=typescript&logoColor=8ABD80" alt="TypeScript"/>
+  &nbsp;
+  <img src="https://img.shields.io/badge/Supabase-1A1A18?style=for-the-badge&logo=supabase&logoColor=8ABD80" alt="Supabase"/>
+  &nbsp;
+  <img src="https://img.shields.io/badge/Claude_AI-1A1A18?style=for-the-badge&logoColor=8ABD80&logo=anthropic" alt="Claude AI"/>
 
-<br />
+</div>
 
-**[Live App](https://serene.vercel.app)** &nbsp;·&nbsp; **[Report an issue](https://github.com/Prabdeepsinghbajajj/Serene/issues)**
+<br/>
 
-<br />
+---
+
+<br/>
+
+## What is Serene?
+
+Serene is a social platform — photos, videos, posts, profiles, follows — but built around a goal that no other social app has ever committed to:
+
+<div align="center">
+  <br/>
+  <img src="https://img.shields.io/badge/%E2%80%9CMake_users_feel_content%2C_rested%2C_and_good_about_their_lives%E2%80%9D-2F5027?style=for-the-badge&labelColor=1A2818" alt="Mission"/>
+  <br/><br/>
+</div>
+
+Every other platform is engineered to keep you scrolling as long as possible. Serene is engineered to do the opposite. No endless feed. No public like counts. No algorithmic pressure. An AI that actively encourages you to log off.
+
+<br/>
+
+---
+
+<br/>
+
+## The Difference
+
+<table>
+  <thead>
+    <tr>
+      <th width="35%" align="left" bgcolor="#111110"><font color="#4A4A45">&nbsp;&nbsp;Feature</font></th>
+      <th width="32%" align="left" bgcolor="#111110"><font color="#4A4A45">&nbsp;&nbsp;Every other app</font></th>
+      <th width="33%" align="left" bgcolor="#1A2818"><font color="#8ABD80">&nbsp;&nbsp;🌿 Serene</font></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td bgcolor="#1A1A18"><font color="#7A7A74">&nbsp;&nbsp;Feed</font></td>
+      <td bgcolor="#1A1A18"><font color="#4A4A45">&nbsp;&nbsp;Never ends. Ever.</font></td>
+      <td bgcolor="#1A2818"><font color="#A8D89E">&nbsp;&nbsp;Ends at 30 posts per day</font></td>
+    </tr>
+    <tr>
+      <td bgcolor="#1A1A18"><font color="#7A7A74">&nbsp;&nbsp;Like counts</font></td>
+      <td bgcolor="#1A1A18"><font color="#4A4A45">&nbsp;&nbsp;Public everywhere</font></td>
+      <td bgcolor="#1A2818"><font color="#A8D89E">&nbsp;&nbsp;Only you see yours</font></td>
+    </tr>
+    <tr>
+      <td bgcolor="#1A1A18"><font color="#7A7A74">&nbsp;&nbsp;Algorithm</font></td>
+      <td bgcolor="#1A1A18"><font color="#4A4A45">&nbsp;&nbsp;Maximise watch time</font></td>
+      <td bgcolor="#1A2818"><font color="#A8D89E">&nbsp;&nbsp;Curated for your mood</font></td>
+    </tr>
+    <tr>
+      <td bgcolor="#1A1A18"><font color="#7A7A74">&nbsp;&nbsp;Ads</font></td>
+      <td bgcolor="#1A1A18"><font color="#4A4A45">&nbsp;&nbsp;Retargeted to your behaviour</font></td>
+      <td bgcolor="#1A2818"><font color="#A8D89E">&nbsp;&nbsp;Ethical whitelist only</font></td>
+    </tr>
+    <tr>
+      <td bgcolor="#1A1A18"><font color="#7A7A74">&nbsp;&nbsp;Session limits</font></td>
+      <td bgcolor="#1A1A18"><font color="#4A4A45">&nbsp;&nbsp;None. Scroll forever.</font></td>
+      <td bgcolor="#1A2818"><font color="#A8D89E">&nbsp;&nbsp;Gentle nudges + daily cap</font></td>
+    </tr>
+    <tr>
+      <td bgcolor="#1A1A18"><font color="#7A7A74">&nbsp;&nbsp;AI</font></td>
+      <td bgcolor="#1A1A18"><font color="#4A4A45">&nbsp;&nbsp;Hooks you back in</font></td>
+      <td bgcolor="#1A2818"><font color="#A8D89E">&nbsp;&nbsp;Wants you to log off</font></td>
+    </tr>
+    <tr>
+      <td bgcolor="#1A1A18"><font color="#7A7A74">&nbsp;&nbsp;Notifications</font></td>
+      <td bgcolor="#1A1A18"><font color="#4A4A45">&nbsp;&nbsp;Likes, streaks, FOMO</font></td>
+      <td bgcolor="#1A2818"><font color="#A8D89E">&nbsp;&nbsp;None of those. Ever.</font></td>
+    </tr>
+  </tbody>
+</table>
+
+<br/>
+
+---
+
+<br/>
+
+## Core Features
+
+<table>
+  <tr>
+    <td width="50%" valign="top" bgcolor="#1A2818">
+      <h3><font color="#A8D89E">🌱 &nbsp;The Wellness Engine</font></h3>
+      <p><font color="#F5F0E8">Serene actively manages how long you spend on it.</font></p>
+      <table>
+        <tr>
+          <td bgcolor="#111110"><font color="#4E7A44"><b>20 min</b></font></td>
+          <td bgcolor="#111110"><font color="#7A7A74">Soft banner — one tap to dismiss</font></td>
+        </tr>
+        <tr>
+          <td bgcolor="#0F1A0D"><font color="#4E7A44"><b>40 min</b></font></td>
+          <td bgcolor="#0F1A0D"><font color="#7A7A74">Full-screen rest + breathing exercise</font></td>
+        </tr>
+        <tr>
+          <td bgcolor="#111110"><font color="#4E7A44"><b>60 min</b></font></td>
+          <td bgcolor="#111110"><font color="#7A7A74">Feed pauses for 10 minutes</font></td>
+        </tr>
+        <tr>
+          <td bgcolor="#0F1A0D"><font color="#4E7A44"><b>30 posts</b></font></td>
+          <td bgcolor="#0F1A0D"><font color="#7A7A74">Daily cap reached — warm end screen</font></td>
+        </tr>
+      </table>
+    </td>
+    <td width="50%" valign="top" bgcolor="#1A1A18">
+      <h3><font color="#A8D89E">🧭 &nbsp;A Feed That Respects You</font></h3>
+      <p><font color="#F5F0E8">No likes. No follower counts. No viral velocity. Posts are scored by:</font></p>
+      <ul>
+        <li><font color="#8ABD80"><b>Relationship depth</b></font> <font color="#7A7A74">— how close you are to the person</font></li>
+        <li><font color="#8ABD80"><b>Mood–time fit</b></font> <font color="#7A7A74">— matches your personality + time of day</font></li>
+        <li><font color="#8ABD80"><b>Recency</b></font> <font color="#7A7A74">— posts older than 48h disappear entirely</font></li>
+        <li><font color="#8ABD80"><b>Serendipity</b></font> <font color="#7A7A74">— something unexpected, every day</font></li>
+      </ul>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top" bgcolor="#1A1A18">
+      <h3><font color="#A8D89E">🍃 &nbsp;Your AI Companion</font></h3>
+      <p><font color="#F5F0E8">Powered by Anthropic Claude. It doesn't say <i>"Great photo!"</i> — it notices the actual light in your picture, the specific detail you chose to share, the feeling in your words.</font></p>
+      <p><font color="#7A7A74">It asks one question at a time. It gently redirects toward the present moment. And when you've been on Serene too long, it asks you to step away. That's not a bug — it's the whole point.</font></p>
+    </td>
+    <td width="50%" valign="top" bgcolor="#1A2818">
+      <h3><font color="#A8D89E">📣 &nbsp;Ethical Advertising</font></h3>
+      <p><font color="#F5F0E8">Ads come from a fixed approved list only:</font></p>
+      <p><font color="#8ABD80">✓ &nbsp;Yoga · cookware · books · hiking gear · art supplies · sleep aids · local events</font></p>
+      <p><font color="#4A4A45">✗ &nbsp;Fast fashion · gambling · alcohol · weight loss · "go viral" products · FOMO promotions · crypto</font></p>
+      <p><font color="#7A7A74"><i>Targeting uses only your personality type and time of day — never your behaviour outside Serene.</i></font></p>
+    </td>
+  </tr>
+</table>
+
+<br/>
+
+---
+
+<br/>
+
+## The Design
+
+<div align="center">
+
+<table>
+  <tr>
+    <td align="center" width="25%" bgcolor="#1A1A18">
+      <br/>
+      <img src="https://img.shields.io/badge/%231A1A18-1A1A18?style=flat-square&label=Background" alt="bg"/>
+      <br/><font color="#4A4A45">Dark slate</font><br/><br/>
+    </td>
+    <td align="center" width="25%" bgcolor="#1A2818">
+      <br/>
+      <img src="https://img.shields.io/badge/%234E7A44-4E7A44?style=flat-square&label=Accent" alt="sage"/>
+      <br/><font color="#8ABD80">Sage green</font><br/><br/>
+    </td>
+    <td align="center" width="25%" bgcolor="#1A1A18">
+      <br/>
+      <img src="https://img.shields.io/badge/%23F5F0E8-F5F0E8?style=flat-square&label=Text&labelColor=1A1A18&color=F5F0E8" alt="cream"/>
+      <br/><font color="#7A7A74">Warm cream</font><br/><br/>
+    </td>
+    <td align="center" width="25%" bgcolor="#1A2818">
+      <br/>
+      <img src="https://img.shields.io/badge/%23D4883A-D4883A?style=flat-square&label=Highlight" alt="amber"/>
+      <br/><font color="#8ABD80">Amber glow</font><br/><br/>
+    </td>
+  </tr>
+</table>
+
+</div>
+
+<br/>
+
+The app uses **Cormorant Garamond** for headings and the companion's voice — it feels like a handwritten letter. **DM Sans** for everything else. Cards are glassmorphic — semi-transparent dark backgrounds with subtle borders. Animations are gentle, never jarring.
+
+What you'll never see anywhere in Serene:
+- 🔴 Red notification badges
+- 📊 Public follower or like counts
+- 🔥 Trending sections
+- ⏱️ Countdown timers or urgency messages
+- 🔔 "You haven't posted in X days" notifications
+
+<br/>
+
+---
+
+<br/>
+
+## The Philosophy
+
+<div align="center">
+<table>
+  <tr>
+    <td align="center" bgcolor="#0F1A0D">
+      <br/>
+      <p><font color="#F5F0E8"><i>Most social platforms measure success in <b>time spent</b> and <b>actions taken</b>.</i></font></p>
+      <p><font color="#8ABD80"><b>Serene measures success in how you feel when you close it.</b></font></p>
+      <br/>
+    </td>
+  </tr>
+</table>
+</div>
+
+<br/>
+
+Serene is not trying to become a daily habit in the way other apps are. It doesn't want to be the first thing you reach for in the morning. It doesn't send notifications to remind you it exists. It isn't designed to trigger FOMO.
+
+It is a calm, beautiful place to share moments with people you care about — and then let you get back to your life.
+
+<br/>
+
+---
+
+<br/>
+
+<div align="center">
+
+  <a href="https://www.serene.network">
+    <img src="https://img.shields.io/badge/Try_Serene-www.serene.network-4E7A44?style=for-the-badge&labelColor=1A1A18" alt="Try Serene"/>
+  </a>
+
+  <br/><br/>
+
+  <sub><font color="#4A4A45">Built with care. Designed to be put down.</font></sub>
 
 </div>
