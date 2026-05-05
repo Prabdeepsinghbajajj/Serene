@@ -121,6 +121,11 @@ export default function LoginPage() {
                 {...register("password")}
               />
               {errors.password && <p className="text-sm text-destructive">{errors.password.message}</p>}
+              <div className="pt-1 text-right">
+                <Link href="/forgot-password" className="font-sans text-xs text-sage-300 hover:text-sage-100 transition-colors">
+                  Forgot password?
+                </Link>
+              </div>
             </div>
 
             {serverError && <p className="text-sm text-destructive">{serverError}</p>}
