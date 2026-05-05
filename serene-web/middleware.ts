@@ -73,6 +73,7 @@ export const config = {
      * - /design-system (dev reference page — no auth needed)
      * - files with an extension (svg, png, jpg, etc.)
      */
-    "/((?!_next/static|_next/image|favicon.ico|design-system|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
+    /* Exclude /icon (metadata PNG) and static assets — otherwise middleware can intercept favicon. */
+    "/((?!_next/static|_next/image|favicon.ico|icon$|design-system|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
