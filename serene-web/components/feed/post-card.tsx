@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { CommentSection } from "@/components/post/comment-section";
 import { useWellness } from "@/hooks/use-wellness";
 import type { FeedPost } from "@/types/feed";
 
@@ -166,6 +167,7 @@ export function PostCard({ post }: { post: FeedPost }) {
 
   const [resonated, setResonated] = useState(post.has_resonated);
   const [resonating, setResonating] = useState(false);
+  const [commentsOpen, setCommentsOpen] = useState(false);
 
   useEffect(() => {
     const el = cardRef.current;
@@ -351,12 +353,21 @@ export function PostCard({ post }: { post: FeedPost }) {
         <button
           type="button"
           aria-label="Comments"
-          className="flex items-center gap-1.5 rounded-lg p-3 -mr-3 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300"
-          style={{ color: "rgba(245,240,232,0.25)" }}
+          aria-expanded={commentsOpen}
+          onClick={() => setCommentsOpen((o) => !o)}
+          className={`flex items-center gap-1.5 rounded-lg p-3 -mr-3 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300 ${
+            commentsOpen ? "text-sage-300" : "text-white/25"
+          }`}
         >
           <MessageCircle size={20} aria-hidden="true" />
         </button>
       </div>
+
+      <CommentSection
+        postId={post.id}
+        isOpen={commentsOpen}
+        onClose={() => setCommentsOpen(false)}
+      />
     </article>
   );
 }
