@@ -89,7 +89,7 @@ function MediaCarousel({ urls, alt }: { urls: string[]; alt: string }) {
           onClick={() => setIdx((i) => i - 1)}
           aria-label="Previous image"
           className="absolute left-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300"
-          style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", color: "#F5F0E8" }}
+          style={{ background: "rgba(0,0,0,0.6)", color: "#F5F0E8" }}
         >
           <ChevronLeft size={16} aria-hidden="true" />
         </button>
@@ -100,7 +100,7 @@ function MediaCarousel({ urls, alt }: { urls: string[]; alt: string }) {
           onClick={() => setIdx((i) => i + 1)}
           aria-label="Next image"
           className="absolute right-2 top-1/2 -translate-y-1/2 flex h-8 w-8 items-center justify-center rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300"
-          style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(4px)", color: "#F5F0E8" }}
+          style={{ background: "rgba(0,0,0,0.6)", color: "#F5F0E8" }}
         >
           <ChevronRight size={16} aria-hidden="true" />
         </button>
@@ -260,8 +260,7 @@ export function PostCard({ post }: { post: FeedPost }) {
           <span
             className="flex-shrink-0 rounded-full px-2.5 py-0.5 font-sans text-[0.52rem] font-bold uppercase tracking-[0.12em] flex items-center gap-1"
             style={{
-              background: "rgba(0,0,0,0.4)",
-              backdropFilter: "blur(8px)",
+              background: "rgba(0,0,0,0.6)",
               border: "1px solid rgba(255,255,255,0.12)",
               color: "rgba(245,240,232,0.85)",
             }}

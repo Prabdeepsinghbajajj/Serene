@@ -4,6 +4,7 @@
 export const dynamic = "force-dynamic";
 
 import { useState } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChevronLeft, Loader2 } from "lucide-react";
@@ -419,13 +420,16 @@ export default function CreatePage() {
                             style={{ maxHeight: 180 }}
                           />
                         ) : (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            key={url}
-                            src={url}
-                            alt={`Preview ${i + 1}`}
-                            className="aspect-square w-full rounded-lg object-cover"
-                          />
+                          <div key={url} className="relative aspect-square w-full overflow-hidden rounded-lg">
+                            <Image
+                              src={url}
+                              alt={`Preview ${i + 1}`}
+                              fill
+                              className="object-cover"
+                              sizes="(max-width: 768px) 50vw, 200px"
+                              unoptimized={url.startsWith("blob:")}
+                            />
+                          </div>
                         )
                       ))}
                     </div>

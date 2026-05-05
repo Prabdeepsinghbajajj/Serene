@@ -143,9 +143,7 @@ export default function CompanionPage() {
         <div
           className="sticky top-0 z-10 flex items-start justify-between px-4 pt-6 pb-4"
           style={{
-            background: "rgba(26,26,24,0.90)",
-            backdropFilter: "blur(16px)",
-            WebkitBackdropFilter: "blur(16px)",
+            background: "rgba(26,26,24,0.97)",
             borderBottom: "1px solid rgba(255,255,255,0.06)",
           }}
         >

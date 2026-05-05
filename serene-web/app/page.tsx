@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, useInView, type Variants } from "framer-motion";
+import { motion, type Variants } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 
 /* =========================================================================
@@ -20,7 +20,7 @@ function useSessionRedirect() {
 }
 
 /* =========================================================================
-   FADE SECTION — scroll-triggered fade-up wrapper
+   FADE SECTION — CSS fade-up + IntersectionObserver (lighter than FM useInView)
    ========================================================================= */
 function FadeSection({
   children,
@@ -32,17 +32,39 @@ function FadeSection({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setVisible(true);
+            obs.disconnect();
+            break;
+          }
+        }
+      },
+      { rootMargin: "-80px 0px -80px 0px", threshold: 0.01 }
+    );
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+
   return (
-    <motion.div
+    <div
       ref={ref}
-      className={className}
-      initial={{ opacity: 0, y: 28 }}
-      animate={isInView ? { opacity: 1, y: 0 } : {}}
-      transition={{ duration: 0.7, ease: "easeOut", delay }}
+      className={`fade-in-section${visible ? " is-visible" : ""}${className ? ` ${className}` : ""}`}
+      style={
+        delay > 0
+          ? { transitionDelay: visible ? `${delay}s` : "0s" }
+          : undefined
+      }
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -123,9 +145,7 @@ export default function LandingPage() {
         className="fixed top-0 left-0 right-0 z-50 flex items-center justify-between"
         style={{
           padding: "1.1rem 3rem",
-          background: "rgba(26,26,24,0.70)",
-          backdropFilter: "blur(24px) saturate(1.5)",
-          WebkitBackdropFilter: "blur(24px) saturate(1.5)",
+          background: "rgba(26,26,24,0.95)",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
       >
@@ -233,10 +253,12 @@ export default function LandingPage() {
       <section className="relative min-h-screen grid grid-cols-1 lg:grid-cols-2 items-center gap-8 grid-bg overflow-hidden"
         style={{ background: "#1A1A18", padding: "8rem 3rem 5rem 5rem" }}>
 
-        <div className="blob" style={{ width: 500, height: 500, background: "radial-gradient(circle, rgba(78,122,68,0.25), transparent 70%)", top: "-10%", right: "5%", animationDuration: "14s" }} />
-        <div className="blob" style={{ width: 400, height: 400, background: "radial-gradient(circle, rgba(212,136,58,0.12), transparent 70%)", bottom: "0", left: "-5%", animationDuration: "18s", animationDelay: "2s" }} />
-        <div className="blob" style={{ width: 350, height: 350, background: "radial-gradient(circle, rgba(122,106,154,0.10), transparent 70%)", top: "30%", left: "30%", animationDuration: "16s", animationDelay: "5s" }} />
-        <div className="blob" style={{ width: 250, height: 250, background: "radial-gradient(circle, rgba(58,122,116,0.12), transparent 70%)", bottom: "20%", right: "30%", animationDuration: "20s", animationDelay: "8s" }} />
+        <div className="mesh-blobs-isolate" aria-hidden="true">
+          <div className="blob" style={{ width: 500, height: 500, background: "radial-gradient(circle, rgba(78,122,68,0.25), transparent 70%)", top: "-10%", right: "5%", animationDuration: "14s" }} />
+          <div className="blob" style={{ width: 400, height: 400, background: "radial-gradient(circle, rgba(212,136,58,0.12), transparent 70%)", bottom: "0", left: "-5%", animationDuration: "18s", animationDelay: "2s" }} />
+          <div className="blob" style={{ width: 350, height: 350, background: "radial-gradient(circle, rgba(122,106,154,0.10), transparent 70%)", top: "30%", left: "30%", animationDuration: "16s", animationDelay: "5s" }} />
+          <div className="blob" style={{ width: 250, height: 250, background: "radial-gradient(circle, rgba(58,122,116,0.12), transparent 70%)", bottom: "20%", right: "30%", animationDuration: "20s", animationDelay: "8s" }} />
+        </div>
 
         {/* LEFT — copy */}
         <motion.div variants={heroContainer} initial="hidden" animate="show" className="relative z-10">
@@ -333,9 +355,8 @@ export default function LandingPage() {
               style={{
                 top: "8%", right: "-22%",
                 padding: "0.7rem 1rem",
-                background: "rgba(30,30,28,0.9)",
+                background: "rgba(30,30,28,0.96)",
                 border: "1px solid rgba(255,255,255,0.10)",
-                backdropFilter: "blur(20px)",
                 boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
               }}
               animate={{ y: [0, -8, 0], rotate: [1, 1, 1] }}
@@ -354,9 +375,8 @@ export default function LandingPage() {
               style={{
                 bottom: "18%", left: "-24%",
                 padding: "0.7rem 1rem",
-                background: "rgba(30,30,28,0.9)",
+                background: "rgba(30,30,28,0.96)",
                 border: "1px solid rgba(255,255,255,0.10)",
-                backdropFilter: "blur(20px)",
                 boxShadow: "0 8px 32px rgba(0,0,0,0.3)",
               }}
               animate={{ y: [0, 8, 0], rotate: [-1, -1, -1] }}
@@ -391,7 +411,7 @@ export default function LandingPage() {
                     style={{ height: 120, background: "linear-gradient(135deg, #1A2818 0%, #2A4A30 25%, #4E6A3A 50%, #8A7A40 75%, #C8953A 100%)" }}>
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.5))" }} />
                     <div className="absolute top-2 right-2 font-sans font-[700] uppercase z-10"
-                      style={{ background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "100px", padding: "0.15rem 0.5rem", fontSize: "0.4rem", color: "rgba(255,255,255,0.9)", letterSpacing: "0.10em" }}>
+                      style={{ background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.15)", borderRadius: "100px", padding: "0.15rem 0.5rem", fontSize: "0.4rem", color: "rgba(255,255,255,0.9)", letterSpacing: "0.10em" }}>
                       🌿 Peaceful
                     </div>
                     <div className="absolute bottom-2 left-2.5 font-sans font-[600] z-10" style={{ fontSize: "0.45rem", color: "rgba(255,255,255,0.8)", letterSpacing: "0.04em" }}>maya_creates</div>
@@ -442,8 +462,10 @@ export default function LandingPage() {
           ================================================================ */}
       <section id="difference" className="relative py-32 overflow-hidden" style={{ background: "linear-gradient(180deg, #1A1A18 0%, #0F1A0D 100%)" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(78,122,68,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(78,122,68,0.04) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-        <div className="absolute rounded-full pointer-events-none" style={{ width: 600, height: 400, top: -100, left: -100, background: "rgba(78,122,68,0.10)", filter: "blur(100px)" }} />
-        <div className="absolute rounded-full pointer-events-none" style={{ width: 400, height: 400, bottom: -100, right: -50, background: "rgba(212,136,58,0.06)", filter: "blur(100px)" }} />
+        <div className="mesh-blobs-isolate" aria-hidden="true">
+          <div className="absolute rounded-full pointer-events-none" style={{ width: 600, height: 400, top: -100, left: -100, background: "rgba(78,122,68,0.10)", filter: "blur(100px)", willChange: "transform" }} />
+          <div className="absolute rounded-full pointer-events-none" style={{ width: 400, height: 400, bottom: -100, right: -50, background: "rgba(212,136,58,0.06)", filter: "blur(100px)", willChange: "transform" }} />
+        </div>
 
         <div className="relative max-w-5xl mx-auto px-6 md:px-10">
           <FadeSection className="mb-14">
@@ -708,7 +730,7 @@ export default function LandingPage() {
                     <div key={user} className="rounded-2xl overflow-hidden mb-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
                       <div className="relative" style={{ height: 140, background: imgGrad }}>
                         <div className="absolute top-0 left-0 right-0 px-3 py-3 flex items-center justify-between">
-                          <span className="font-sans font-[700] uppercase" style={{ fontSize: "0.52rem", letterSpacing: "0.08em", background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "100px", padding: "0.15rem 0.5rem", color: "rgba(255,255,255,0.85)" }}>
+                          <span className="font-sans font-[700] uppercase" style={{ fontSize: "0.52rem", letterSpacing: "0.08em", background: "rgba(0,0,0,0.6)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "100px", padding: "0.15rem 0.5rem", color: "rgba(255,255,255,0.85)" }}>
                             {mood}
                           </span>
                         </div>

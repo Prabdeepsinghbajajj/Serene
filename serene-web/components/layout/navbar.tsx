@@ -241,9 +241,7 @@ export function Navbar() {
       <header
         className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-center h-14"
         style={{
-          background: "rgba(26,26,24,0.90)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
+          background: "rgba(26,26,24,0.95)",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
         aria-label="Serene"
@@ -262,9 +260,7 @@ export function Navbar() {
       <nav
         className="md:hidden fixed bottom-0 left-0 right-0 z-30 flex items-end justify-around px-2"
         style={{
-          background: "rgba(26,26,24,0.95)",
-          backdropFilter: "blur(16px)",
-          WebkitBackdropFilter: "blur(16px)",
+          background: "rgba(26,26,24,0.98)",
           borderTop: "1px solid rgba(255,255,255,0.06)",
           paddingBottom: "env(safe-area-inset-bottom, 0px)",
         }}

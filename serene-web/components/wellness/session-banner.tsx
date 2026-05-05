@@ -19,10 +19,8 @@ export function SessionBanner() {
           transition={{ duration: 0.4, ease: "easeOut" }}
           className="fixed top-0 left-0 right-0 z-40"
           style={{
-            background: "rgba(78,122,68,0.15)",
-            backdropFilter: "blur(12px)",
-            WebkitBackdropFilter: "blur(12px)",
-            borderBottom: "1px solid rgba(78,122,68,0.20)",
+            background: "rgba(26,32,26,0.97)",
+            borderBottom: "1px solid rgba(78,122,68,0.22)",
           }}
         >
           <div className="flex items-center justify-between px-6 py-3">

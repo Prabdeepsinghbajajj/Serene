@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 
 // Onboarding is always dynamic — requires authenticated user session
 export const dynamic = "force-dynamic";
@@ -320,7 +321,7 @@ export default function OnboardingPage() {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="h-[120px] w-[120px] rounded-full overflow-hidden flex items-center justify-center transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300"
+                    className="relative h-[120px] w-[120px] rounded-full overflow-hidden flex items-center justify-center transition-all focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300"
                     style={{
                       border: "2px dashed rgba(138,189,128,0.3)",
                       background: avatarPreview ? "transparent" : "rgba(255,255,255,0.03)",
@@ -328,8 +329,14 @@ export default function OnboardingPage() {
                     aria-label="Upload profile photo"
                   >
                     {avatarPreview ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={avatarPreview} alt="Avatar preview" className="h-full w-full object-cover" />
+                      <Image
+                        src={avatarPreview}
+                        alt="Avatar preview"
+                        fill
+                        className="object-cover"
+                        sizes="120px"
+                        unoptimized
+                      />
                     ) : (
                       <span className="font-sans text-sm text-center px-3" style={{ color: "rgba(245,240,232,0.35)" }}>
                         Tap to add photo

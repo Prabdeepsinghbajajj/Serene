@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import Image from "next/image";
 import { X, UploadCloud } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
@@ -239,12 +240,16 @@ export function MediaUploader({
           {uploaded.map((file, i) => (
             <div key={file.url} className="relative group">
               {file.type === "image" ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={file.previewUrl}
-                  alt={`Upload ${i + 1}`}
-                  className="aspect-square w-full rounded-lg object-cover"
-                />
+                <div className="relative aspect-square w-full overflow-hidden rounded-lg">
+                  <Image
+                    src={file.previewUrl}
+                    alt={`Upload ${i + 1}`}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 640px) 50vw, 200px"
+                    unoptimized
+                  />
+                </div>
               ) : (
                 <video
                   src={file.previewUrl}
