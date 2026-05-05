@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { PostCard } from "@/components/feed/post-card";
 import { FeedSkeleton } from "@/components/feed/feed-skeleton";
 import { EthicalAdCard } from "@/components/ads/ethical-ad-card";
+import { UserSearch } from "@/components/search/user-search";
 import type { FeedPost } from "@/types/feed";
 import type { ServedAd } from "@/types/ads";
 
@@ -161,6 +162,14 @@ export default function DiscoverPage() {
           </p>
         </div>
       )}
+
+      <section className="mb-6 space-y-3">
+        <h2 className="font-sans text-sm font-medium uppercase tracking-wider text-white/50">
+          Find people
+        </h2>
+        <UserSearch className="w-full max-w-md" />
+        <div className="pt-2" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }} />
+      </section>
 
       {isLoading && <FeedSkeleton />}
 

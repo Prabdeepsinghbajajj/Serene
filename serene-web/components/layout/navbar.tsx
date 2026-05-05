@@ -1,9 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { House, Compass, Plus, User, LogOut } from "lucide-react";
+import { House, Compass, Plus, User, LogOut, Search } from "lucide-react";
 import { useUser } from "@/context/user-context";
+import { UserSearch } from "@/components/search/user-search";
+import { MobileSearchOverlay } from "@/components/search/mobile-search-overlay";
 
 /* -------------------------------------------------------------------------- */
 /*  Inline leaf SVG for Companion tab                                          */
@@ -177,6 +180,7 @@ export function Navbar() {
   const { profile, loading, signOut } = useUser();
   const username = profile?.username;
   const navItems = useNavItems(username);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
 
   function isActive(href: string) {
     if (href === "/feed") return pathname === "/feed";
@@ -206,8 +210,17 @@ export function Navbar() {
           </Link>
         </div>
 
+        <div className="flex-shrink-0 px-4 pt-4 pb-3">
+          <UserSearch className="w-full" />
+          <div
+            className="mt-4"
+            style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
+            aria-hidden
+          />
+        </div>
+
         {/* Nav links */}
-        <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+        <nav className="flex-1 px-2 py-2 space-y-1 overflow-y-auto min-h-0">
           {navItems.map(({ href, item }) => (
             <NavLink
               key={item.label}
@@ -239,13 +252,21 @@ export function Navbar() {
       {/* Mobile top bar                                                     */}
       {/* ================================================================= */}
       <header
-        className="md:hidden fixed top-0 left-0 right-0 z-30 flex items-center justify-center h-14"
+        className="md:hidden fixed top-0 left-0 right-0 z-30 flex h-14 items-center justify-center px-3"
         style={{
           background: "rgba(26,26,24,0.95)",
           borderBottom: "1px solid rgba(255,255,255,0.06)",
         }}
         aria-label="Serene"
       >
+        <button
+          type="button"
+          onClick={() => setMobileSearchOpen(true)}
+          className="absolute left-3 top-1/2 -translate-y-1/2 rounded-lg p-2 text-white/50 transition-colors hover:bg-white/[0.06] hover:text-white/70 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400"
+          aria-label="Search people"
+        >
+          <Search size={20} aria-hidden />
+        </button>
         <Link
           href="/feed"
           className="font-display text-lg text-grad-sage cursor-pointer no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400 rounded"
@@ -253,6 +274,11 @@ export function Navbar() {
           Serene
         </Link>
       </header>
+
+      <MobileSearchOverlay
+        open={mobileSearchOpen}
+        onClose={() => setMobileSearchOpen(false)}
+      />
 
       {/* ================================================================= */}
       {/* Mobile bottom tab bar                                              */}
