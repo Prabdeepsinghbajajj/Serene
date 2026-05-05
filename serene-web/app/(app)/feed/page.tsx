@@ -4,9 +4,11 @@ export const dynamic = "force-dynamic";
 
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { useFeed } from "@/hooks/use-feed";
 import { PostCard } from "@/components/feed/post-card";
+import { useUser } from "@/context/user-context";
+import type { MoodTag } from "@/types/database";
 import { FeedSkeleton } from "@/components/feed/feed-skeleton";
 import { Button } from "@/components/ui/button";
 import { Heading, Body } from "@/components/ui/typography";
@@ -101,6 +103,7 @@ function EndOfFeed() {
 }
 
 export default function FeedPage() {
+  const { profile } = useUser();
   const {
     posts,
     hasMore,
@@ -109,6 +112,8 @@ export default function FeedPage() {
     error,
     loadFeed,
     loadMore,
+    removePost,
+    updatePost,
   } = useFeed();
 
   useEffect(() => {
@@ -152,9 +157,30 @@ export default function FeedPage() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          {posts.map((post) => (
-            <PostCard key={post.id} post={post} />
-          ))}
+          <AnimatePresence initial={false}>
+            {posts.map((post) => (
+              <motion.div
+                key={post.id}
+                layout
+                initial={{ opacity: 1 }}
+                exit={{ opacity: 0, height: 0, marginBottom: 0, overflow: "hidden" }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
+              >
+                <PostCard
+                  post={post}
+                  currentUserId={profile?.id}
+                  onDeleted={() => removePost(post.id)}
+                  onEdited={(caption, moodTag) =>
+                    updatePost(post.id, {
+                      caption: caption.length ? caption : null,
+                      mood_tag: moodTag as MoodTag,
+                    })
+                  }
+                />
+              </motion.div>
+            ))}
+          </AnimatePresence>
 
           {/* Load more — never auto-loads (bible §7 / wellness philosophy) */}
           {hasMore && (

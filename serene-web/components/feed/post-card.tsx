@@ -5,8 +5,10 @@ import Image from "next/image";
 import { MessageCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { CommentSection } from "@/components/post/comment-section";
+import { PostOptionsMenu } from "@/components/post/post-options-menu";
 import { useWellness } from "@/hooks/use-wellness";
 import type { FeedPost } from "@/types/feed";
+import type { MoodTag } from "@/types/database";
 
 /* -------------------------------------------------------------------------- */
 /*  Inline leaf icon                                                            */
@@ -160,7 +162,22 @@ function capitalize(s: string) {
 /* -------------------------------------------------------------------------- */
 /*  PostCard                                                                    */
 /* -------------------------------------------------------------------------- */
-export function PostCard({ post }: { post: FeedPost }) {
+interface PostCardProps {
+  post: FeedPost;
+  currentUserId?: string | null;
+  onDeleted?: () => void;
+  onEdited?: (caption: string, moodTag: string) => void;
+  /** Skip feed impression logging (e.g. profile detail sheet). */
+  skipWellnessTracking?: boolean;
+}
+
+export function PostCard({
+  post,
+  currentUserId,
+  onDeleted,
+  onEdited,
+  skipWellnessTracking = false,
+}: PostCardProps) {
   const { recordImpression } = useWellness();
   const cardRef = useRef<HTMLDivElement>(null);
   const impressionFired = useRef(false);
@@ -168,8 +185,16 @@ export function PostCard({ post }: { post: FeedPost }) {
   const [resonated, setResonated] = useState(post.has_resonated);
   const [resonating, setResonating] = useState(false);
   const [commentsOpen, setCommentsOpen] = useState(false);
+  const [localCaption, setLocalCaption] = useState(post.caption);
+  const [localMood, setLocalMood] = useState(post.mood_tag);
 
   useEffect(() => {
+    setLocalCaption(post.caption);
+    setLocalMood(post.mood_tag);
+  }, [post.id, post.caption, post.mood_tag]);
+
+  useEffect(() => {
+    if (skipWellnessTracking) return;
     const el = cardRef.current;
     if (!el || impressionFired.current) return;
     let timer: ReturnType<typeof setTimeout> | null = null;
@@ -193,7 +218,7 @@ export function PostCard({ post }: { post: FeedPost }) {
       obs.disconnect();
       if (timer) clearTimeout(timer);
     };
-  }, [recordImpression]);
+  }, [recordImpression, skipWellnessTracking]);
 
   async function handleResonate() {
     if (resonating) return;
@@ -217,7 +242,7 @@ export function PostCard({ post }: { post: FeedPost }) {
   const isTextType = post.content_type === "text" || post.content_type === "slow_post";
   const hasMedia = !isTextType && post.media_urls && post.media_urls.length > 0;
   const isVideo = post.content_type === "video" && post.media_urls && post.media_urls.length > 0;
-  const altText = post.caption ?? `${post.creator.display_name}'s photo`;
+  const altText = localCaption ?? `${post.creator.display_name}'s photo`;
   const initials = post.creator.display_name
     .split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
 
@@ -239,46 +264,71 @@ export function PostCard({ post }: { post: FeedPost }) {
       }}
     >
       {/* Header */}
-      <div className="flex items-center gap-3">
-        <Avatar className="h-8 w-8 flex-shrink-0">
-          {post.creator.avatar_url && (
-            <AvatarImage src={post.creator.avatar_url} alt={post.creator.display_name} />
-          )}
-          <AvatarFallback
-            className="text-xs font-medium"
-            style={{ background: "rgba(78,122,68,0.2)", color: "#8ABD80" }}
-          >
-            {initials}
-          </AvatarFallback>
-        </Avatar>
+      <div className="flex flex-col gap-2">
+        <div className="flex items-start gap-3">
+          <Avatar className="h-8 w-8 flex-shrink-0">
+            {post.creator.avatar_url && (
+              <AvatarImage src={post.creator.avatar_url} alt={post.creator.display_name} />
+            )}
+            <AvatarFallback
+              className="text-xs font-medium"
+              style={{ background: "rgba(78,122,68,0.2)", color: "#8ABD80" }}
+            >
+              {initials}
+            </AvatarFallback>
+          </Avatar>
 
-        <div className="flex-1 min-w-0">
-          <p className="font-sans text-sm font-semibold truncate tracking-wide" style={{ color: "rgba(245,240,232,0.70)" }}>
-            {post.creator.display_name}
-          </p>
+          <div className="min-w-0 flex-1 pt-0.5">
+            <p
+              className="truncate font-sans text-sm font-semibold tracking-wide"
+              style={{ color: "rgba(245,240,232,0.70)" }}
+            >
+              {post.creator.display_name}
+            </p>
+          </div>
+
+          <div className="flex shrink-0 flex-col items-end gap-1 sm:flex-row sm:items-center sm:gap-2">
+            {localMood && (
+              <span
+                className="flex flex-shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 font-sans text-[0.52rem] font-bold uppercase tracking-[0.12em]"
+                style={{
+                  background: "rgba(0,0,0,0.6)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  color: "rgba(245,240,232,0.85)",
+                }}
+              >
+                <span aria-hidden="true" style={{ fontSize: "0.4rem" }}>
+                  ●
+                </span>
+                {capitalize(localMood)}
+              </span>
+            )}
+
+            <time
+              className="flex-shrink-0 font-sans text-xs"
+              style={{ color: "rgba(245,240,232,0.25)" }}
+              dateTime={post.created_at}
+            >
+              {relativeTime(post.created_at)}
+            </time>
+
+            <div className="flex w-full min-w-0 flex-col items-end sm:w-auto">
+              <PostOptionsMenu
+                postId={post.id}
+                postOwnerId={post.user_id}
+                currentUserId={currentUserId}
+                caption={localCaption}
+                moodTag={localMood}
+                onDeleted={() => onDeleted?.()}
+                onEdited={(c, m) => {
+                  setLocalCaption(c.length ? c : null);
+                  setLocalMood(m as MoodTag);
+                  onEdited?.(c, m);
+                }}
+              />
+            </div>
+          </div>
         </div>
-
-        {post.mood_tag && (
-          <span
-            className="flex-shrink-0 rounded-full px-2.5 py-0.5 font-sans text-[0.52rem] font-bold uppercase tracking-[0.12em] flex items-center gap-1"
-            style={{
-              background: "rgba(0,0,0,0.6)",
-              border: "1px solid rgba(255,255,255,0.12)",
-              color: "rgba(245,240,232,0.85)",
-            }}
-          >
-            <span aria-hidden="true" style={{ fontSize: "0.4rem" }}>●</span>
-            {capitalize(post.mood_tag)}
-          </span>
-        )}
-
-        <time
-          className="flex-shrink-0 font-sans text-xs"
-          style={{ color: "rgba(245,240,232,0.25)" }}
-          dateTime={post.created_at}
-        >
-          {relativeTime(post.created_at)}
-        </time>
       </div>
 
       {/* Media */}
@@ -298,16 +348,16 @@ export function PostCard({ post }: { post: FeedPost }) {
       )}
 
       {/* Text post */}
-      {isTextType && post.caption && (
+      {isTextType && localCaption && (
         <div className="rounded-lg px-5 py-5" style={{ background: "rgba(255,255,255,0.04)" }}>
           <p className="font-serif italic text-lg leading-relaxed" style={{ color: "rgba(245,240,232,0.7)" }}>
-            {post.caption}
+            {localCaption}
           </p>
         </div>
       )}
 
       {/* Caption for photo/video */}
-      {!isTextType && post.caption && <Caption text={post.caption} />}
+      {!isTextType && localCaption && <Caption text={localCaption} />}
 
       {/* AI companion message */}
       {post.ai_companion_message && (

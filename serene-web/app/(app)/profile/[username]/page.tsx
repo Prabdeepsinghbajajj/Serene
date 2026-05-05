@@ -160,9 +160,21 @@ export default function ProfilePage() {
             <p className="font-sans text-sm" style={{ color: "rgba(245,240,232,0.30)" }}>
               {private_stats.post_count} post{private_stats.post_count !== 1 ? "s" : ""}{" "}
               &middot;{" "}
-              {private_stats.follower_count} follower{private_stats.follower_count !== 1 ? "s" : ""}{" "}
+              <Link
+                href={`/profile/${encodeURIComponent(profile.username)}/followers`}
+                className="text-white/50 underline-offset-2 transition-colors hover:text-sage-300 hover:underline"
+              >
+                {private_stats.follower_count} follower
+                {private_stats.follower_count !== 1 ? "s" : ""}
+              </Link>
+              {" "}
               &middot;{" "}
-              {private_stats.following_count} following
+              <Link
+                href={`/profile/${encodeURIComponent(profile.username)}/following`}
+                className="text-white/50 underline-offset-2 transition-colors hover:text-sage-300 hover:underline"
+              >
+                {private_stats.following_count} following
+              </Link>
             </p>
           </div>
         )}

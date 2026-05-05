@@ -14,6 +14,8 @@ interface UseFeedReturn {
   error: string | null;
   loadFeed: () => Promise<void>;
   loadMore: () => Promise<void>;
+  removePost: (postId: string) => void;
+  updatePost: (postId: string, patch: Partial<FeedPost>) => void;
 }
 
 export function useFeed(): UseFeedReturn {
@@ -43,6 +45,16 @@ export function useFeed(): UseFeedReturn {
     } finally {
       setIsLoading(false);
     }
+  }, []);
+
+  const removePost = useCallback((postId: string) => {
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
+  }, []);
+
+  const updatePost = useCallback((postId: string, patch: Partial<FeedPost>) => {
+    setPosts((prev) =>
+      prev.map((p) => (p.id === postId ? { ...p, ...patch } : p))
+    );
   }, []);
 
   const loadMore = useCallback(async () => {
@@ -76,5 +88,7 @@ export function useFeed(): UseFeedReturn {
     error,
     loadFeed,
     loadMore,
+    removePost,
+    updatePost,
   };
 }

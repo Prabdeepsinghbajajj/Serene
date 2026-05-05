@@ -9,6 +9,8 @@ interface FollowButtonProps {
   username: string;
   initialIsFollowing: boolean;
   isOwnProfile: boolean;
+  /** Tighter control for list rows */
+  compact?: boolean;
 }
 
 export function FollowButton({
@@ -16,6 +18,7 @@ export function FollowButton({
   username,
   initialIsFollowing,
   isOwnProfile,
+  compact = false,
 }: FollowButtonProps) {
   const [isFollowing, setIsFollowing] = useState(initialIsFollowing);
   const [isHovering, setIsHovering] = useState(false);
@@ -26,7 +29,11 @@ export function FollowButton({
   if (isOwnProfile) {
     return (
       <Link href={`/profile/${username}/edit`}>
-        <Button variant="outline" size="sm" className="font-sans">
+        <Button
+          variant="outline"
+          size="sm"
+          className={`font-sans ${compact ? "h-8 px-2.5 text-xs" : ""}`}
+        >
           Edit profile
         </Button>
       </Link>
@@ -67,6 +74,8 @@ export function FollowButton({
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
         className={`font-sans transition-colors ${
+          compact ? "h-8 px-2.5 text-xs" : ""
+        } ${
           showUnfollow
             ? "text-slate-muted border-cream-200"
             : isFollowing

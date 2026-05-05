@@ -3,12 +3,14 @@
 export const dynamic = "force-dynamic";
 
 import { useEffect, useRef, useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { PostCard } from "@/components/feed/post-card";
+import { useUser } from "@/context/user-context";
 import { FeedSkeleton } from "@/components/feed/feed-skeleton";
 import { EthicalAdCard } from "@/components/ads/ethical-ad-card";
 import { UserSearch } from "@/components/search/user-search";
 import type { FeedPost } from "@/types/feed";
+import type { MoodTag } from "@/types/database";
 import type { ServedAd } from "@/types/ads";
 
 /* -------------------------------------------------------------------------- */
@@ -104,6 +106,7 @@ interface DiscoverResponse {
 }
 
 export default function DiscoverPage() {
+  const { profile } = useUser();
   const [posts, setPosts] = useState<FeedPost[]>([]);
   const [refreshesAt, setRefreshesAt] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -133,6 +136,23 @@ export default function DiscoverPage() {
       .catch(() => setError("Couldn't load today's picks. Try again later."))
       .finally(() => setIsLoading(false));
   }, []);
+
+  function removePost(postId: string) {
+    setPosts((prev) => prev.filter((p) => p.id !== postId));
+  }
+
+  function updatePost(
+    postId: string,
+    patch: { caption: string | null; mood_tag: MoodTag }
+  ) {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p.id === postId
+          ? { ...p, caption: patch.caption, mood_tag: patch.mood_tag }
+          : p
+      )
+    );
+  }
 
   function formatMidnight(iso: string | null): string {
     if (!iso) return "midnight";
@@ -194,12 +214,40 @@ export default function DiscoverPage() {
           animate={{ opacity: 1 }}
           transition={{ duration: 0.3 }}
         >
-          {posts.map((post, idx) => (
-            <div key={post.id}>
-              <PostCard post={post} />
-              {idx === 4 && <div className="mt-4"><AdSlot /></div>}
-            </div>
-          ))}
+          <AnimatePresence initial={false}>
+            {posts.map((post, idx) => (
+              <motion.div
+                key={post.id}
+                layout
+                initial={{ opacity: 1 }}
+                exit={{
+                  opacity: 0,
+                  height: 0,
+                  marginBottom: 0,
+                  overflow: "hidden",
+                }}
+                transition={{ duration: 0.25 }}
+                className="overflow-hidden"
+              >
+                <PostCard
+                  post={post}
+                  currentUserId={profile?.id}
+                  onDeleted={() => removePost(post.id)}
+                  onEdited={(caption, moodTag) =>
+                    updatePost(post.id, {
+                      caption: caption.length ? caption : null,
+                      mood_tag: moodTag as MoodTag,
+                    })
+                  }
+                />
+                {idx === 4 && (
+                  <div className="mt-4">
+                    <AdSlot />
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </AnimatePresence>
 
           <div className="flex items-center justify-center gap-2 py-8" style={{ color: "rgba(245,240,232,0.20)" }}>
             <LeafSmall />

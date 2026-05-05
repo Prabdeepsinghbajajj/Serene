@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { PostDetailSheet } from "@/components/post/post-detail-sheet";
+import { useUser } from "@/context/user-context";
 import type { ProfilePostGridItem } from "@/app/api/profile/[username]/posts/route";
 
 /* -------------------------------------------------------------------------- */
@@ -35,25 +37,30 @@ function GridSkeleton() {
 /* -------------------------------------------------------------------------- */
 /*  Single grid cell                                                            */
 /* -------------------------------------------------------------------------- */
-function GridCell({ post }: { post: ProfilePostGridItem }) {
+function GridCell({
+  post,
+  onOpen,
+}: {
+  post: ProfilePostGridItem;
+  onOpen: (postId: string) => void;
+}) {
   const isText =
     post.content_type === "text" || post.content_type === "slow_post";
   const coverUrl = post.media_urls?.[0] ?? null;
   const emoji =
     post.mood_tag ? (MOOD_EMOJI[post.mood_tag] ?? "🌱") : "🌱";
 
-  function handleClick() {
-    // Post detail is Phase 2 — log for now
-    console.log("post id:", post.id);
+  function handleOpen() {
+    onOpen(post.id);
   }
 
   return (
     <div
       role="button"
       tabIndex={0}
-      onClick={handleClick}
+      onClick={handleOpen}
       onKeyDown={(e) => {
-        if (e.key === "Enter" || e.key === " ") handleClick();
+        if (e.key === "Enter" || e.key === " ") handleOpen();
       }}
       aria-label={`View post`}
       className="relative aspect-square w-full rounded-sm overflow-hidden bg-cream-100 cursor-pointer transition-[filter] duration-150 hover:brightness-95 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-400"
@@ -104,6 +111,8 @@ interface FetchState {
 }
 
 export function PostGrid({ username, isOwnProfile }: PostGridProps) {
+  const { profile } = useUser();
+  const [sheetPostId, setSheetPostId] = useState<string | null>(null);
   const [state, setState] = useState<FetchState>({
     posts: [],
     hasMore: false,
@@ -185,27 +194,42 @@ export function PostGrid({ username, isOwnProfile }: PostGridProps) {
     );
   }
 
+  function removePostFromGrid(postId: string) {
+    setState((prev) => ({
+      ...prev,
+      posts: prev.posts.filter((p) => p.id !== postId),
+    }));
+  }
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-1 sm:gap-2">
-        {state.posts.map((post) => (
-          <GridCell key={post.id} post={post} />
-        ))}
+    <>
+      <div className="space-y-4">
+        <div className="grid grid-cols-3 gap-1 sm:gap-2">
+          {state.posts.map((post) => (
+            <GridCell key={post.id} post={post} onOpen={setSheetPostId} />
+          ))}
+        </div>
+
+        {state.hasMore && (
+          <div className="px-4 pt-2">
+            <Button
+              variant="outline"
+              className="w-full font-sans"
+              disabled={state.isLoadingMore}
+              onClick={() => fetchPage(state.page + 1, true)}
+            >
+              {state.isLoadingMore ? "Loading…" : "Load more"}
+            </Button>
+          </div>
+        )}
       </div>
 
-      {/* Load more — never auto-loads */}
-      {state.hasMore && (
-        <div className="pt-2 px-4">
-          <Button
-            variant="outline"
-            className="w-full font-sans"
-            disabled={state.isLoadingMore}
-            onClick={() => fetchPage(state.page + 1, true)}
-          >
-            {state.isLoadingMore ? "Loading…" : "Load more"}
-          </Button>
-        </div>
-      )}
-    </div>
+      <PostDetailSheet
+        postId={sheetPostId}
+        onClose={() => setSheetPostId(null)}
+        currentUserId={profile?.id}
+        onPostDeleted={removePostFromGrid}
+      />
+    </>
   );
 }
