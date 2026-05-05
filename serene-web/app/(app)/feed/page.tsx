@@ -20,12 +20,18 @@ function FeedGreeting() {
   useEffect(() => {
     const hour = new Date().getHours();
     const text =
-      hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
-    const date = new Date().toLocaleDateString("en-US", {
+      hour < 5
+        ? "It's late. Rest is part of the practice."
+        : hour < 12
+        ? "Good morning. What's worth sharing today?"
+        : hour < 18
+        ? "Good afternoon. How are you feeling?"
+        : "Good evening. You've done enough today.";
+    const date = hour >= 5 ? new Date().toLocaleDateString("en-US", {
       weekday: "long",
       month: "long",
       day: "numeric",
-    });
+    }) : "";
     setGreeting({ text, date });
   }, []);
 
@@ -88,7 +94,7 @@ function EndOfFeed() {
         />
       </svg>
       <span className="font-sans text-sm" style={{ color: "rgba(245,240,232,0.25)" }}>
-        You&apos;re all caught up.
+        You&apos;ve seen what matters. The rest can wait.
       </span>
     </div>
   );

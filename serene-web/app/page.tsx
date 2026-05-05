@@ -62,24 +62,48 @@ const heroItem: Variants = {
    MARQUEE ITEMS
    ========================================================================= */
 const MARQUEE_ITEMS = [
-  "No infinite scroll",
-  "No follower counts",
-  "No FOMO ads",
-  "AI that wants you to rest",
-  "Feed that ends",
-  "Calm by design",
+  "AI that works for you",
+  "Not against you",
+  "Ads you can actually trust",
+  "A friend who knows you",
+  "Built for your wellbeing",
+  "Not your screen time",
 ];
 
 /* =========================================================================
-   WELLNESS CARDS  — matches design reference exactly
+   WELLNESS CARDS
    ========================================================================= */
 const WELLNESS_CARDS = [
-  { icon: "⏱", title: "The feed ends", desc: "30 posts a day, then warmly closes. \"Good things are waiting tomorrow.\"" },
-  { icon: "🌬", title: "Rest screens", desc: "Nature and breathing after 40 minutes. A genuine pause, not a punishment." },
-  { icon: "🔒", title: "No public counts", desc: "Follower counts, likes, views — none shown publicly. You&apos;re not a metric." },
-  { icon: "🌱", title: "Ethical ads only", desc: "Health, nature, creativity brands only. No fast fashion, gambling, or FOMO." },
-  { icon: "🧭", title: "Calm discovery", desc: "10 curated posts per day. Refreshes at midnight. Not infinite." },
-  { icon: "🤍", title: "Resonance, not likes", desc: "A leaf, not a heart counter. Connection without performance anxiety." },
+  {
+    icon: "⏱",
+    title: "Breathing room, built in",
+    desc: "Serene checks in after 20 minutes. After 40, it gently suggests a break. Not as a punishment — as a genuine reminder that life is happening outside the screen.",
+  },
+  {
+    icon: "🧘",
+    title: "Move. Breathe. Step outside.",
+    desc: "Your companion actively encourages you to stand, stretch, and go outside. Your physical health matters here — not just your mood.",
+  },
+  {
+    icon: "🔒",
+    title: "No metrics on people",
+    desc: "No follower counts. No like counts. No view counts shown publicly. You are not a number and neither is anyone else here.",
+  },
+  {
+    icon: "🌱",
+    title: "Ads we'd recommend ourselves",
+    desc: "Our AI reads every ad before it runs. If a brand isn't genuinely good for your mental or physical health, it doesn't appear here. Full stop.",
+  },
+  {
+    icon: "🤝",
+    title: "AI that builds you up",
+    desc: "Instead of learning what keeps you scrolling, Serene's AI learns what makes you feel good — and shows you more of that. A fundamental difference in intention.",
+  },
+  {
+    icon: "🤍",
+    title: "Connection, not competition",
+    desc: "A quiet leaf instead of a like counter. Share because it matters to you — not because you're tracking performance. This is a space, not a stage.",
+  },
 ];
 
 /* =========================================================================
@@ -176,7 +200,6 @@ export default function LandingPage() {
           </button>
         </div>
 
-        {/* Mobile menu */}
         {menuOpen && (
           <motion.div
             className="absolute top-full left-0 right-0 px-6 py-6 space-y-4 md:hidden"
@@ -210,7 +233,6 @@ export default function LandingPage() {
       <section className="relative min-h-screen grid grid-cols-1 lg:grid-cols-2 items-center gap-8 grid-bg overflow-hidden"
         style={{ background: "#1A1A18", padding: "8rem 3rem 5rem 5rem" }}>
 
-        {/* Animated mesh blobs */}
         <div className="blob" style={{ width: 500, height: 500, background: "radial-gradient(circle, rgba(78,122,68,0.25), transparent 70%)", top: "-10%", right: "5%", animationDuration: "14s" }} />
         <div className="blob" style={{ width: 400, height: 400, background: "radial-gradient(circle, rgba(212,136,58,0.12), transparent 70%)", bottom: "0", left: "-5%", animationDuration: "18s", animationDelay: "2s" }} />
         <div className="blob" style={{ width: 350, height: 350, background: "radial-gradient(circle, rgba(122,106,154,0.10), transparent 70%)", top: "30%", left: "30%", animationDuration: "16s", animationDelay: "5s" }} />
@@ -222,7 +244,7 @@ export default function LandingPage() {
           <motion.div variants={heroItem} className="flex items-center gap-3 mb-7">
             <div className="h-px w-8" style={{ background: "linear-gradient(90deg, #8ABD80, transparent)" }} />
             <span className="font-sans font-[700] uppercase" style={{ fontSize: "0.65rem", letterSpacing: "0.25em", color: "#8ABD80" }}>
-              A new kind of social
+              Social media, finally on your side
             </span>
           </motion.div>
 
@@ -232,15 +254,9 @@ export default function LandingPage() {
             className="font-display mb-7"
             style={{ fontSize: "clamp(3.5rem, 5.5vw, 5.8rem)", fontWeight: 300, lineHeight: 1.0 }}
           >
-            <span style={{ color: "#F5F0E8", display: "block" }}>
-              Share{" "}
-              <span style={{ WebkitTextStroke: "1px rgba(245,240,232,0.4)", color: "transparent" }}>freely.</span>
-            </span>
-            <span style={{ display: "block" }}>
-              <span style={{ color: "#F5F0E8" }}>Scroll{" "}</span>
-              <span className="text-grad-hero italic">less.</span>
-            </span>
-            <span className="text-grad-hero italic" style={{ display: "block" }}>Feel better.</span>
+            <span style={{ color: "#F5F0E8", display: "block" }}>The platform</span>
+            <span className="text-grad-hero italic" style={{ display: "block" }}>that works</span>
+            <span style={{ color: "#F5F0E8", display: "block" }}>for you.</span>
           </motion.h1>
 
           {/* Subtitle */}
@@ -249,7 +265,7 @@ export default function LandingPage() {
             className="font-sans font-[300] mb-10"
             style={{ fontSize: "1rem", lineHeight: 1.9, color: "rgba(245,240,232,0.55)", maxWidth: 420 }}
           >
-            Serene is built around your wellbeing — not your attention span. A feed that ends. An AI companion that genuinely wants you to rest.
+            Every other platform uses AI to study your habits, moods, and vulnerabilities — to keep you scrolling and sell you things. Serene uses that same intelligence to do the opposite: to understand you, support you, and actively work for your wellbeing.
           </motion.p>
 
           {/* CTAs */}
@@ -271,7 +287,7 @@ export default function LandingPage() {
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 8px 32px rgba(78,122,68,0.5), 0 0 40px rgba(78,122,68,0.2)"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.boxShadow = "0 4px 24px rgba(78,122,68,0.4), 0 0 0 1px rgba(78,122,68,0.3)"; }}
             >
-              Join Serene <span className="transition-transform group-hover:translate-x-1">→</span>
+              Join Serene →
             </Link>
             <a
               href="#difference"
@@ -280,7 +296,7 @@ export default function LandingPage() {
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#F5F0E8"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(245,240,232,0.5)"; }}
             >
-              See how it&apos;s different <span>→</span>
+              See what makes us different →
             </a>
           </motion.div>
 
@@ -291,9 +307,9 @@ export default function LandingPage() {
             style={{ borderTop: "1px solid rgba(255,255,255,0.07)" }}
           >
             {[
-              { num: "30", label: "Posts per day max" },
-              { num: "0", label: "Public like counts" },
-              { num: "∞", label: "Calmer scrolling" },
+              { num: "0", label: "Times AI is used against you" },
+              { num: "100%", label: "Ads vetted for your health" },
+              { num: "∞", label: "More present in real life" },
             ].map(({ num, label }) => (
               <div key={label}>
                 <span className="font-display text-grad-sage block" style={{ fontSize: "2rem", fontWeight: 400, lineHeight: 1 }}>{num}</span>
@@ -363,23 +379,14 @@ export default function LandingPage() {
                 boxShadow: "0 40px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.08), inset 0 1px 0 rgba(255,255,255,0.1)",
               }}
             >
-              {/* Tinted overlay */}
               <div className="absolute inset-0 z-0 pointer-events-none" style={{ background: "linear-gradient(135deg, rgba(78,122,68,0.08), transparent 50%, rgba(212,136,58,0.05))" }} />
-
-              {/* Notch */}
               <div className="relative z-10 mx-auto" style={{ width: 90, height: 26, background: "rgba(30,30,28,0.95)", borderRadius: "0 0 18px 18px" }} />
-
-              {/* Inner content */}
               <div className="relative z-10" style={{ height: "calc(100% - 26px)", display: "flex", flexDirection: "column" }}>
-                {/* Top bar */}
                 <div className="flex items-center justify-between px-4 py-2" style={{ borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                   <span className="font-display text-grad-sage" style={{ fontSize: "0.9rem" }}>Serene</span>
                   <span className="font-sans font-[600]" style={{ fontSize: "0.5rem", color: "rgba(255,255,255,0.3)", letterSpacing: "0.05em" }}>9:41</span>
                 </div>
-
-                {/* Post card */}
                 <div className="mx-2.5 mt-2 rounded-2xl overflow-hidden" style={{ border: "1px solid rgba(255,255,255,0.06)", background: "rgba(40,40,38,0.8)" }}>
-                  {/* Image */}
                   <div className="relative flex items-center justify-center"
                     style={{ height: 120, background: "linear-gradient(135deg, #1A2818 0%, #2A4A30 25%, #4E6A3A 50%, #8A7A40 75%, #C8953A 100%)" }}>
                     <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.5))" }} />
@@ -389,7 +396,6 @@ export default function LandingPage() {
                     </div>
                     <div className="absolute bottom-2 left-2.5 font-sans font-[600] z-10" style={{ fontSize: "0.45rem", color: "rgba(255,255,255,0.8)", letterSpacing: "0.04em" }}>maya_creates</div>
                   </div>
-                  {/* Body */}
                   <div className="px-2.5 py-2.5 space-y-2">
                     <p className="font-sans font-[300]" style={{ fontSize: "0.5rem", color: "rgba(245,240,232,0.5)", lineHeight: 1.6 }}>
                       Golden hour from the balcony tonight. Some things stay beautiful.
@@ -402,8 +408,6 @@ export default function LandingPage() {
                     </div>
                   </div>
                 </div>
-
-                {/* Footer */}
                 <div className="px-4 py-2 text-center">
                   <p className="font-sans" style={{ fontSize: "0.38rem", color: "rgba(245,240,232,0.2)", letterSpacing: "0.12em" }}>
                     ✦ &nbsp; You&apos;ve seen everything from today &nbsp; ✦
@@ -434,12 +438,10 @@ export default function LandingPage() {
       </div>
 
       {/* ================================================================
-          THE DIFFERENCE  — 2-column comparison cards
+          THE DIFFERENCE
           ================================================================ */}
       <section id="difference" className="relative py-32 overflow-hidden" style={{ background: "linear-gradient(180deg, #1A1A18 0%, #0F1A0D 100%)" }}>
-        {/* Sage grid overlay */}
         <div className="absolute inset-0 pointer-events-none" style={{ backgroundImage: "linear-gradient(rgba(78,122,68,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(78,122,68,0.04) 1px, transparent 1px)", backgroundSize: "60px 60px" }} />
-        {/* Glow orbs */}
         <div className="absolute rounded-full pointer-events-none" style={{ width: 600, height: 400, top: -100, left: -100, background: "rgba(78,122,68,0.10)", filter: "blur(100px)" }} />
         <div className="absolute rounded-full pointer-events-none" style={{ width: 400, height: 400, bottom: -100, right: -50, background: "rgba(212,136,58,0.06)", filter: "blur(100px)" }} />
 
@@ -450,8 +452,8 @@ export default function LandingPage() {
               <span className="font-sans font-[700] uppercase" style={{ fontSize: "0.65rem", letterSpacing: "0.22em", color: "#8ABD80" }}>The difference</span>
             </div>
             <h2 className="font-display font-[300]" style={{ fontSize: "clamp(2.5rem, 4vw, 4rem)", lineHeight: 1.05, maxWidth: 600 }}>
-              Social media doesn&apos;t have to make you feel{" "}
-              <em className="text-grad-hero">worse.</em>
+              The same AI. A completely<br />
+              different <em className="text-grad-hero">intention.</em>
             </h2>
           </FadeSection>
 
@@ -460,14 +462,14 @@ export default function LandingPage() {
               {/* Their column */}
               <div className="rounded-3xl p-10" style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.05)" }}>
                 <div className="font-sans font-[600] uppercase pb-5 mb-6" style={{ fontSize: "0.62rem", letterSpacing: "0.18em", color: "rgba(255,255,255,0.20)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                  Other platforms
+                  How other platforms use AI
                 </div>
                 {[
-                  "Infinite scroll designed to trap you for hours",
-                  "Follower counts that fuel comparison and anxiety",
-                  "Ads targeting your fears and insecurities",
-                  "Algorithms that reward outrage over connection",
-                  "Notifications engineered to bring you back compulsively",
+                  "Studies your mood to show you ads at your weakest moment",
+                  "Learns your habits to exploit them for longer sessions",
+                  "Uses your emotional state to recommend addictive content",
+                  "Slides any ad that pays — regardless of impact on you",
+                  "Sends notifications engineered to trigger anxiety and FOMO",
                 ].map((text) => (
                   <div key={text} className="flex items-start gap-3 mb-5">
                     <div className="flex-shrink-0 w-[22px] h-[22px] rounded-full flex items-center justify-center mt-px" style={{ background: "rgba(255,255,255,0.04)" }}>
@@ -480,17 +482,16 @@ export default function LandingPage() {
 
               {/* Our column */}
               <div className="relative rounded-3xl p-10 overflow-hidden" style={{ background: "linear-gradient(135deg, rgba(78,122,68,0.12), rgba(78,122,68,0.06))", border: "1px solid rgba(78,122,68,0.20)" }}>
-                {/* Top accent line */}
                 <div className="absolute top-0 left-0 right-0 h-[2px]" style={{ background: "linear-gradient(90deg, transparent, #8ABD80, transparent)" }} />
                 <div className="font-sans font-[600] uppercase pb-5 mb-6" style={{ fontSize: "0.62rem", letterSpacing: "0.18em", color: "#8ABD80", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
-                  Serene
+                  How Serene uses AI
                 </div>
                 {[
-                  "A feed that ends — 30 posts a day, then gentle rest",
-                  "No public counts — your worth isn\u2019t a number",
-                  "Ads only from health, nature and creativity brands",
-                  "Algorithm built on relationship depth, not virality",
-                  "An AI companion that actively encourages you to rest",
+                  "Understands you like a friend — to support, not exploit",
+                  "Learns your patterns to nudge you toward rest and balance",
+                  "Checks in on your wellbeing and reminds you to breathe",
+                  "Vets every ad — only promotes what\u2019s genuinely good for you",
+                  "Notifies you only when it actually matters to people you care about",
                 ].map((text) => (
                   <div key={text} className="flex items-start gap-3 mb-5">
                     <div className="flex-shrink-0 w-[22px] h-[22px] rounded-full flex items-center justify-center mt-px" style={{ background: "rgba(138,189,128,0.20)" }}>
@@ -518,18 +519,28 @@ export default function LandingPage() {
                 <span className="font-sans font-[700] uppercase" style={{ fontSize: "0.65rem", letterSpacing: "0.22em", color: "#4E7A44" }}>Your companion</span>
               </div>
               <h2 className="font-display font-[300] mb-5" style={{ fontSize: "clamp(2.2rem, 3.5vw, 3.5rem)", color: "#1A1A18", lineHeight: 1.1 }}>
-                An AI that wants you to{" "}
-                <em className="italic" style={{ color: "#4E7A44" }}>feel good,</em>{" "}
-                not scroll more.
+                An AI that knows you<br />like a <em className="italic" style={{ color: "#4E7A44" }}>friend.</em><br />Not an algorithm.
               </h2>
               <p className="font-sans font-[300] mb-8" style={{ fontSize: "0.9rem", lineHeight: 1.9, color: "#6B6B63" }}>
-                Every post gets a warm, specific note — not &ldquo;great photo!&rdquo; but something that shows it actually noticed what you shared. And when you need to talk, it&apos;s there. Without judgment, without metrics.
+                Most platforms use AI to build a profile of your vulnerabilities. Serene uses it to build something different — a genuine understanding of who you are, what you need, and how you&apos;re feeling. Your companion notices when you&apos;re struggling, celebrates what matters to you, and never uses what it knows against you.
               </p>
               <div className="flex flex-col gap-3">
                 {[
-                  { icon: "🌿", title: "Responds to your posts", body: "Specific, warm, genuine — never a generic compliment." },
-                  { icon: "💭", title: "A quiet space to check in", body: "Chat whenever you need grounding. It listens without judgment." },
-                  { icon: "🌙", title: "Tells you when to rest", body: "After 40 minutes it gently suggests you step away — and means it." },
+                  {
+                    icon: "🌿",
+                    title: "Reads between the lines",
+                    body: "Understands the mood and meaning behind what you share — not to target you, but to respond with genuine warmth.",
+                  },
+                  {
+                    icon: "💭",
+                    title: "Checks in on you",
+                    body: "Asks how you\u2019re doing. Reminds you to stand up, take a breath, go outside. Treats your health as the priority, not your session length.",
+                  },
+                  {
+                    icon: "🌙",
+                    title: "Never used against you",
+                    body: "What your companion learns about you stays with you. It is never sold, never used for targeting, never weaponised for engagement.",
+                  },
                 ].map(({ icon, title, body }) => (
                   <div
                     key={title}
@@ -567,7 +578,6 @@ export default function LandingPage() {
                   boxShadow: "0 30px 80px rgba(26,26,24,0.20), 0 0 0 1px rgba(255,255,255,0.06)",
                 }}
               >
-                {/* Chat header */}
                 <div className="flex items-center justify-between mb-6">
                   <span className="font-display text-grad-sage" style={{ fontSize: "1.1rem" }}>Your companion</span>
                   <span className="font-sans font-[700] uppercase" style={{ fontSize: "0.55rem", letterSpacing: "0.10em", color: "#8ABD80", background: "rgba(78,122,68,0.15)", padding: "0.3rem 0.7rem", borderRadius: "100px", border: "1px solid rgba(78,122,68,0.2)" }}>
@@ -575,35 +585,33 @@ export default function LandingPage() {
                   </span>
                 </div>
 
-                {/* Messages */}
                 <div className="space-y-4 mb-4">
                   <div className="flex justify-end">
                     <div className="font-sans font-[300] rounded-[18px] rounded-tr-[4px] px-4 py-2.5 max-w-[80%]"
                       style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.06)", fontSize: "0.8rem", color: "rgba(245,240,232,0.8)", lineHeight: 1.5 }}>
-                      I keep comparing my work to others and feeling behind.
+                      I&apos;ve been on my phone for hours and I feel kind of hollow about it.
                     </div>
                   </div>
                   <div className="flex justify-start">
                     <div className="font-display italic rounded-[18px] rounded-tl-[4px] px-4 py-3 max-w-[85%]"
                       style={{ background: "linear-gradient(135deg, rgba(78,122,68,0.20), rgba(78,122,68,0.10))", border: "1px solid rgba(78,122,68,0.20)", fontSize: "0.88rem", color: "#A8D89E", lineHeight: 1.65 }}>
-                      That feeling is exhausting — and really common. What would it feel like to look at just your own work today, without the comparison?
+                      That hollow feeling is worth listening to. Your body noticed something your mind was trying to ignore. What would feel good right now — even just for five minutes?
                     </div>
                   </div>
                   <div className="flex justify-end">
                     <div className="font-sans font-[300] rounded-[18px] rounded-tr-[4px] px-4 py-2.5 max-w-[80%]"
                       style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.06)", fontSize: "0.8rem", color: "rgba(245,240,232,0.8)", lineHeight: 1.5 }}>
-                      Honestly… lighter. I hadn&apos;t thought of it that way.
+                      Maybe a walk. I haven&apos;t been outside today.
                     </div>
                   </div>
                   <div className="flex justify-start">
                     <div className="font-display italic rounded-[18px] rounded-tl-[4px] px-4 py-3 max-w-[85%]"
                       style={{ background: "linear-gradient(135deg, rgba(78,122,68,0.20), rgba(78,122,68,0.10))", border: "1px solid rgba(78,122,68,0.20)", fontSize: "0.88rem", color: "#A8D89E", lineHeight: 1.65 }}>
-                      That lightness is worth protecting. You&apos;ve been here 38 minutes — would you like to take a breath outside?
+                      That sounds exactly right. I&apos;ll be here when you get back. Go — the feed can wait.
                     </div>
                   </div>
                 </div>
 
-                {/* Footer status */}
                 <div className="flex items-center gap-2 pt-4" style={{ borderTop: "1px solid rgba(255,255,255,0.05)" }}>
                   <div className="w-[7px] h-[7px] rounded-full bg-[#8ABD80]" style={{ animation: "pulse 2s ease-in-out infinite" }} />
                   <span className="font-sans font-[300]" style={{ fontSize: "0.65rem", color: "rgba(245,240,232,0.3)" }}>
@@ -617,10 +625,9 @@ export default function LandingPage() {
       </section>
 
       {/* ================================================================
-          APP PREVIEW — browser mockup with real post cards
+          APP PREVIEW
           ================================================================ */}
       <section className="py-32 relative overflow-hidden" style={{ background: "linear-gradient(135deg, #0D1A0B, #1A2818, #1A1A18)" }}>
-        {/* Center glow */}
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 50% 60% at 50% 50%, rgba(78,122,68,0.15), transparent 60%)" }} />
 
         <div className="relative max-w-5xl mx-auto px-6 md:px-10">
@@ -632,16 +639,15 @@ export default function LandingPage() {
             </div>
             <h2 className="font-display font-[300] mb-4" style={{ fontSize: "clamp(2.2rem, 3.5vw, 3.5rem)", color: "#F5F0E8" }}>
               Beautiful by design.<br />
-              <em className="text-grad-hero">Calm by intention.</em>
+              <em className="text-grad-hero">Honest by intention.</em>
             </h2>
             <p className="font-sans font-[300] mx-auto" style={{ fontSize: "0.9rem", lineHeight: 1.8, color: "rgba(245,240,232,0.4)", maxWidth: 500 }}>
-              Every surface of Serene is designed to feel good — dark, warm, and alive without being demanding.
+              Serene looks like a social app. It works like one too. The difference is what&apos;s underneath — an AI that has genuinely different priorities than every other platform you&apos;ve used.
             </p>
           </FadeSection>
 
           <FadeSection delay={0.2}>
             <div className="rounded-2xl overflow-hidden" style={{ background: "rgba(20,20,18,0.9)", border: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 40px 100px rgba(0,0,0,0.5)" }}>
-              {/* Browser bar */}
               <div className="flex items-center gap-3 px-4 py-3.5" style={{ background: "rgba(30,30,28,0.95)", borderBottom: "1px solid rgba(255,255,255,0.06)" }}>
                 <div className="flex gap-1.5">
                   {[{ bg: "#FF5F57" }, { bg: "#FEBC2E" }, { bg: "#28C840" }].map(({ bg }, i) => (
@@ -653,9 +659,7 @@ export default function LandingPage() {
                 </div>
               </div>
 
-              {/* App layout */}
               <div className="flex" style={{ minHeight: 400 }}>
-                {/* Sidebar */}
                 <div className="hidden md:flex flex-col py-6 px-4" style={{ width: 220, flexShrink: 0, background: "rgba(245,240,232,0.02)", borderRight: "1px solid rgba(255,255,255,0.05)" }}>
                   <span className="font-display text-grad-sage mb-6 px-3 block" style={{ fontSize: "1.1rem" }}>Serene</span>
                   {[
@@ -665,7 +669,7 @@ export default function LandingPage() {
                     { icon: "👤", label: "Profile" },
                     { icon: "🌿", label: "Companion" },
                   ].map(({ icon, label, active }) => (
-                    <div key={label} className="flex items-center gap-2.5 rounded-xl mb-1 cursor-default transition-all duration-200"
+                    <div key={label} className="flex items-center gap-2.5 rounded-xl mb-1 cursor-default"
                       style={{
                         padding: active ? "0.6rem 0.75rem 0.6rem calc(0.75rem - 2px)" : "0.6rem 0.75rem",
                         background: active ? "rgba(78,122,68,0.15)" : "transparent",
@@ -678,10 +682,9 @@ export default function LandingPage() {
                   ))}
                 </div>
 
-                {/* Feed area */}
                 <div className="flex-1 p-6 overflow-hidden">
                   <div className="font-display italic mb-6 pb-4" style={{ fontSize: "1rem", color: "rgba(245,240,232,0.4)", borderBottom: "1px solid rgba(255,255,255,0.05)" }}>
-                    Good evening — everything you needed to see is here.
+                    Good evening, Maya. How are you feeling today?
                   </div>
 
                   {[
@@ -703,7 +706,6 @@ export default function LandingPage() {
                     },
                   ].map(({ user, time, mood, imgGrad, cap, note }) => (
                     <div key={user} className="rounded-2xl overflow-hidden mb-4" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.07)" }}>
-                      {/* Image */}
                       <div className="relative" style={{ height: 140, background: imgGrad }}>
                         <div className="absolute top-0 left-0 right-0 px-3 py-3 flex items-center justify-between">
                           <span className="font-sans font-[700] uppercase" style={{ fontSize: "0.52rem", letterSpacing: "0.08em", background: "rgba(0,0,0,0.4)", backdropFilter: "blur(8px)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: "100px", padding: "0.15rem 0.5rem", color: "rgba(255,255,255,0.85)" }}>
@@ -711,7 +713,6 @@ export default function LandingPage() {
                           </span>
                         </div>
                       </div>
-                      {/* Body */}
                       <div className="px-3 py-3">
                         <div className="font-sans font-[600] mb-1.5" style={{ fontSize: "0.65rem", color: "rgba(245,240,232,0.7)", letterSpacing: "0.02em" }}>
                           {user} · <span style={{ fontWeight: 300, color: "rgba(245,240,232,0.3)" }}>{time}</span>
@@ -722,7 +723,6 @@ export default function LandingPage() {
                           <p className="font-display italic" style={{ fontSize: "0.55rem", color: "rgba(168,216,158,0.7)", lineHeight: 1.4 }}>{note}</p>
                         </div>
                       </div>
-                      {/* Actions */}
                       <div className="flex items-center justify-between px-3 pb-3" style={{ borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: "0.5rem" }}>
                         <span className="font-sans flex items-center gap-1.5" style={{ fontSize: "0.6rem", color: "rgba(245,240,232,0.25)" }}>🍃 Resonate</span>
                         <span className="font-sans flex items-center gap-1.5" style={{ fontSize: "0.6rem", color: "rgba(245,240,232,0.25)" }}>💬 Reply</span>
@@ -743,19 +743,18 @@ export default function LandingPage() {
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 40% at 50% 0%, rgba(78,122,68,0.12), transparent 60%)" }} />
 
         <div className="relative max-w-6xl mx-auto px-6 md:px-10">
-          <FadeSection className="text-center mb-18">
+          <FadeSection className="text-center mb-16">
             <div className="flex items-center justify-center gap-3 mb-5">
               <div className="h-px w-8" style={{ background: "#8ABD80" }} />
               <span className="font-sans font-[700] uppercase" style={{ fontSize: "0.65rem", letterSpacing: "0.22em", color: "#8ABD80" }}>How it works</span>
               <div className="h-px w-8" style={{ background: "#8ABD80" }} />
             </div>
             <h2 className="font-display font-[300]" style={{ fontSize: "clamp(2.2rem, 3.5vw, 3.5rem)", lineHeight: 1.1 }}>
-              Designed for your <em className="text-grad-hero">wellbeing,</em>
-              <br />not your attention span
+              Every feature is built<br />around <em className="text-grad-hero">you,</em> not engagement.
             </h2>
           </FadeSection>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 mt-16">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             {WELLNESS_CARDS.map(({ icon, title, desc }, i) => (
               <FadeSection key={title} delay={i * 0.07}>
                 <div
@@ -779,8 +778,7 @@ export default function LandingPage() {
                     {icon}
                   </div>
                   <h3 className="font-display font-[400] mb-2.5" style={{ fontSize: "1.2rem", color: "#F5F0E8" }}>{title}</h3>
-                  <p className="font-sans font-[300]" style={{ fontSize: "0.78rem", lineHeight: 1.75, color: "rgba(245,240,232,0.45)" }}
-                    dangerouslySetInnerHTML={{ __html: desc.replace(/&apos;/g, "'") }} />
+                  <p className="font-sans font-[300]" style={{ fontSize: "0.78rem", lineHeight: 1.75, color: "rgba(245,240,232,0.45)" }}>{desc}</p>
                 </div>
               </FadeSection>
             ))}
@@ -789,7 +787,7 @@ export default function LandingPage() {
       </section>
 
       {/* ================================================================
-          CTA  — cream background
+          CTA
           ================================================================ */}
       <section className="py-32 relative overflow-hidden text-center" style={{ background: "#F5F0E8" }}>
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 60% 60% at 50% 100%, rgba(78,122,68,0.10), transparent), radial-gradient(ellipse 40% 40% at 20% 20%, rgba(212,136,58,0.06), transparent)" }} />
@@ -798,16 +796,16 @@ export default function LandingPage() {
           <FadeSection>
             <div className="inline-flex items-center gap-2 rounded-full mb-8 font-sans font-[700] uppercase"
               style={{ background: "rgba(78,122,68,0.10)", border: "1px solid rgba(78,122,68,0.20)", padding: "0.4rem 1rem", fontSize: "0.65rem", letterSpacing: "0.12em", color: "#4E7A44" }}>
-              ✦ Free to join
+              ✦ Different by design
             </div>
 
             <h2 className="font-display font-[300] mb-6" style={{ fontSize: "clamp(3rem, 6vw, 5.5rem)", color: "#1A1A18", lineHeight: 1.0 }}>
-              Ready to feel<br />
-              <em className="text-grad-hero">better</em> online?
+              Ready for social media<br />
+              that&apos;s actually <em className="text-grad-hero">on your side?</em>
             </h2>
 
             <p className="font-sans font-[300] mx-auto mb-12" style={{ fontSize: "1rem", lineHeight: 1.85, color: "#6B6B63", maxWidth: 440 }}>
-              Join Serene — a place to share what matters, rest when you need to, and actually enjoy being online again.
+              Serene is what social media looks like when the AI is working for you instead of against you. Join us — and feel the difference.
             </p>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4">

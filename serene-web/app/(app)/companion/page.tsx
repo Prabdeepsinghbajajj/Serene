@@ -154,7 +154,7 @@ export default function CompanionPage() {
               Your companion
             </h1>
             <p className="font-sans text-sm mt-0.5" style={{ color: "rgba(245,240,232,0.35)" }}>
-              A quiet space to check in
+              Your AI — working for you, not the platform
             </p>
           </div>
           {messages.length > 0 && (
@@ -181,10 +181,10 @@ export default function CompanionPage() {
             <div className="flex flex-col items-center justify-center h-full min-h-[300px] space-y-4 text-center">
               <LeafIllustration />
               <p className="font-display italic text-xl" style={{ color: "rgba(245,240,232,0.5)" }}>
-                How are you today?
+                I&apos;m here. What&apos;s on your mind?
               </p>
               <p className="font-sans text-base max-w-xs leading-[1.7]" style={{ color: "rgba(245,240,232,0.3)" }}>
-                This is your space. No judgement, no metrics.
+                This is a space that&apos;s genuinely on your side. No tracking. No targeting. Just a conversation.
               </p>
             </div>
           )}

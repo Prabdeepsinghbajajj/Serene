@@ -20,14 +20,14 @@ const todayKeyword =
   NATURE_KEYWORDS[new Date().getDay() % NATURE_KEYWORDS.length];
 
 const AFFIRMING_MESSAGES = [
-  "This moment is yours.",
-  "You've seen what matters today.",
-  "Rest is part of the practice.",
-  "The feed will be here tomorrow.",
-  "You've done enough today.",
-  "Take a breath. You're okay.",
-  "Good things don't expire.",
-  "Stillness is underrated.",
+  "Your companion thinks you should take a moment.",
+  "The feed will be here. You don't have to be.",
+  "You've been here a while. Step outside — even briefly.",
+  "Rest is not a reward. It's part of the practice.",
+  "What's happening outside right now?",
+  "Your body will thank you for this pause.",
+  "The best moments aren't on a screen.",
+  "Serene is on your side. That means this too.",
 ];
 
 export function RestScreen() {
@@ -86,8 +86,8 @@ export function RestScreen() {
 
         <p className="font-sans text-sm text-cream-200 mt-2">
           {isLocked
-            ? "Come back in a little while."
-            : "A moment to pause."}
+            ? "Time for a proper break. Go outside, move around, drink some water. We'll be here when you're ready."
+            : "Your companion noticed you've been here a while. Take a breath. The feed will be waiting."}
         </p>
 
         <div className="mt-8">

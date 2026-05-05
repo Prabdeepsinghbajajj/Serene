@@ -223,10 +223,10 @@ export default function OnboardingPage() {
               <div className="space-y-8">
                 <div className="space-y-2">
                   <h1 className="font-display text-3xl font-[300]" style={{ color: "#F5F0E8" }}>
-                    What brings you to Serene?
+                    Tell us a little about yourself
                   </h1>
                   <p className="font-sans text-base" style={{ color: "rgba(245,240,232,0.45)" }}>
-                    This helps us make your space feel like yours.
+                    Your companion will use this to understand you — not to target you. This stays with you.
                   </p>
                 </div>
 
@@ -269,7 +269,7 @@ export default function OnboardingPage() {
               <div className="space-y-8">
                 {backButton}
                 <h1 className="font-display text-3xl font-[300]" style={{ color: "#F5F0E8" }}>
-                  When do you usually have a quiet moment?
+                  When do you usually have time to yourself?
                 </h1>
 
                 <div className="grid grid-cols-2 gap-3">
