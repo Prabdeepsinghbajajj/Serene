@@ -1,28 +1,26 @@
+import Anthropic from "@anthropic-ai/sdk";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
 import {
   containsCrisisLanguage,
-  buildCrisisResponse,
+  CRISIS_RESOURCES,
 } from "@/lib/ai/crisis-detection";
 import type { Json } from "@/types/database";
 
+const client = new Anthropic({ apiKey: process.env.SERENE_ANTHROPIC_API_KEY });
+
 const RATE_LIMIT = 20; // messages per hour per user (bible §11)
 
-/* -------------------------------------------------------------------------- */
-/*  Placeholder responses — warm, grounding, brief (§9 system prompt style)   */
-/*  TODO: Replace with Anthropic API streaming call when                       */
-/*        SERENE_ANTHROPIC_API_KEY is configured                               */
-/* -------------------------------------------------------------------------- */
-const PLACEHOLDER_RESPONSES = [
-  "That sounds like it matters to you. What feels most present about it right now?",
-  "I hear you. Sometimes just putting it into words is its own kind of relief.",
-  "Thank you for sharing that. What would feel like a small step forward today?",
-  "That makes sense. How are you feeling in your body right now — is there any tension you notice?",
-  "It sounds like there's a lot going on. What's one thing that felt okay today, even briefly?",
-  "I'm here. Take your time — there's no rush in this space.",
-  "That's worth sitting with. What do you think you need most right now?",
-  "Sometimes things feel heavier than they are, and sometimes exactly as heavy. How does this feel to you?",
-];
+const WELLNESS_SYSTEM_PROMPT = `You are the Serene companion — a warm, grounding presence for this user.
+Be a genuine friend who listens without judgment.
+Validate feelings briefly, then gently redirect toward something grounding.
+Actively encourage rest, movement, and going outside.
+Keep responses 2-4 sentences.
+Never ask multiple questions at once.
+Never suggest posting more or growing their audience.
+Never provide clinical diagnosis or therapy.
+If the user expresses crisis-level distress, always append crisis resources immediately.
+You want the user to feel better — ideally by stepping away from the screen.`;
 
 export async function POST(request: Request) {
   const supabase = createClient();
@@ -55,7 +53,7 @@ export async function POST(request: Request) {
     .gte("created_at", oneHourAgo);
 
   if ((count ?? 0) >= RATE_LIMIT) {
-    return streamText(
+    return streamStaticText(
       "Take a moment away — come back soon. I'll be here."
     );
   }
@@ -70,37 +68,60 @@ export async function POST(request: Request) {
   /* ---- Crisis detection (§9: always provide resources immediately) -------- */
   const hasCrisis = containsCrisisLanguage(lastUserMessage);
 
-  /*
-   * TODO: Replace this entire block with:
-   *
-   *   import Anthropic from '@anthropic-ai/sdk'
-   *   const client = new Anthropic({ apiKey: process.env.SERENE_ANTHROPIC_API_KEY })
-   *   const stream = await client.messages.stream({
-   *     model: 'claude-sonnet-4-20250514',
-   *     max_tokens: 1024,
-   *     system: WELLNESS_SYSTEM_PROMPT,
-   *     messages: messages.map(m => ({ role: m.role as 'user'|'assistant', content: m.content })),
-   *   })
-   *   const finalResponse = hasCrisis
-   *     ? buildCrisisResponse(await stream.finalText())
-   *     : await stream.finalText()
-   *   return new Response(stream.toReadableStream(), { headers: ... })
-   *
-   * When SERENE_ANTHROPIC_API_KEY is configured
-   */
-  const baseResponse =
-    PLACEHOLDER_RESPONSES[
-      Math.floor(Math.random() * PLACEHOLDER_RESPONSES.length)
-    ];
-  const finalResponse = hasCrisis
-    ? buildCrisisResponse(baseResponse)
-    : baseResponse;
+  /* ---- Stream response from Claude ---------------------------------------- */
+  const trimmedMessages = messages
+    .filter((m) => m.content && m.content.trim().length > 0)
+    .slice(-10);
 
-  return streamText(finalResponse);
+  const encoder = new TextEncoder();
+
+  try {
+    const stream = await client.messages.stream({
+      model: "claude-sonnet-4-20250514",
+      max_tokens: 1024,
+      system: WELLNESS_SYSTEM_PROMPT,
+      messages: trimmedMessages.map((m) => ({
+        role: m.role as "user" | "assistant",
+        content: m.content,
+      })),
+    });
+
+    const readable = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of stream) {
+            if (
+              chunk.type === "content_block_delta" &&
+              chunk.delta.type === "text_delta"
+            ) {
+              controller.enqueue(encoder.encode(chunk.delta.text));
+            }
+          }
+
+          if (hasCrisis) {
+            controller.enqueue(encoder.encode("\n\n---\n\n" + CRISIS_RESOURCES));
+          }
+        } finally {
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(readable, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Transfer-Encoding": "chunked",
+      },
+    });
+  } catch {
+    return streamStaticText(
+      "I'm having a little trouble right now. Give me a moment and try again."
+    );
+  }
 }
 
-/* Simulate streaming word-by-word so the client streaming code is exercised */
-function streamText(text: string): Response {
+/** Used only for the rate-limit static message */
+function streamStaticText(text: string): Response {
   const encoder = new TextEncoder();
   const words = text.split(" ");
 

@@ -61,10 +61,33 @@ export async function POST(request: Request) {
   const { content_type, caption, media_urls, mood_tag, text_content } =
     parsed.data;
 
-  /* 3. AI companion message — placeholder until SERENE_ANTHROPIC_API_KEY is configured */
-  // TODO: Replace with Anthropic API call when SERENE_ANTHROPIC_API_KEY is configured
-  // Call POST /api/ai/post-companion with caption + media_urls to get a specific message
-  const ai_companion_message = "What a lovely moment to share.";
+  /* 3. AI companion message — call post-companion route synchronously so the
+        message is persisted with the post row (not fire-and-forget) */
+  let ai_companion_message = "What a lovely moment to share.";
+  try {
+    const companionRes = await fetch(
+      `${process.env.NEXT_PUBLIC_SITE_URL}/api/ai/post-companion`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          caption: content_type === "text" || content_type === "slow_post"
+            ? text_content ?? caption
+            : caption,
+          media_url: media_urls?.[0] ?? null,
+          content_type,
+          mood_tag,
+        }),
+      }
+    );
+    if (companionRes.ok) {
+      const { message } = (await companionRes.json()) as { message: string };
+      if (message) ai_companion_message = message;
+    }
+  } catch (e) {
+    // Non-fatal — post still saves with fallback message
+    console.error("post-companion fetch failed:", e);
+  }
 
   /* 4. Build the caption field — for text/slow_post, content lives in caption */
   const finalCaption =
