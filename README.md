@@ -1,5 +1,5 @@
 <div align="center">
-  <img src="assets/banner.svg" width="100%" alt="Serene — A new kind of social"/>
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:101A0D,50:2C4828,100:1E1E1C&height=220&section=header&text=Serene&fontSize=96&fontAlign=50&fontAlignY=52&fontColor=A8D89E&desc=Share%20freely.%20Scroll%20less.%20Feel%20better.&descSize=18&descAlign=50&descAlignY=74&descColor=F5F0E8" width="100%" alt="Serene — A new kind of social"/>
 </div>
 
 <br/>
