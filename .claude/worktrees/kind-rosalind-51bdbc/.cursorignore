@@ -1,0 +1,5 @@
+.env*
+.env.local
+serene-web/node_modules/
+serene-mobile/node_modules/
+supabase/.temp/

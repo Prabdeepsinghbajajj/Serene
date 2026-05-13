@@ -1,0 +1,571 @@
+# SERENE — PROJECT BIBLE & CURSOR RULES
+# Read this entire file before writing any code, proposing any structure, or making any architectural decision.
+# This is the single source of truth for the Serene project.
+
+---
+
+## 1. WHAT SERENE IS
+
+Serene is a wellness-first social media platform. It looks like Instagram on the surface — photos, videos, stories, profiles, follows — but its entire business logic, feed algorithm, AI layer, and design system are built around a completely different goal:
+
+> Make users feel content, rested, and good about their lives — NOT maximise time on app.
+
+This is not a marketing tagline. It is an engineering constraint. Every feature decision must be measured against it. If a feature would increase engagement at the cost of user wellbeing, the feature is wrong, not the measurement.
+
+### What Serene is NOT
+- Not an engagement-maximising platform
+- Not ad-revenue driven in a traditional sense
+- Not designed around follower counts, viral metrics, or social comparison
+- Not infinite scroll by default
+- Not a mental health app (it does not provide therapy or clinical support)
+
+---
+
+## 2. TECH STACK — USE EXACTLY THESE, NO SUBSTITUTIONS WITHOUT DISCUSSION
+
+### Web App
+- Framework: Next.js 14 (App Router, not Pages Router)
+- Language: TypeScript (strict mode, no `any` types)
+- Styling: Tailwind CSS + shadcn/ui for base components
+- Animations: Framer Motion (gentle, never jarring)
+- State: Zustand for global client state
+- Forms: React Hook Form + Zod validation
+
+### Mobile App
+- Framework: React Native with Expo SDK 51+
+- Language: TypeScript
+- Styling: NativeWind (Tailwind for React Native)
+- Navigation: Expo Router (file-based, same mental model as Next.js)
+- Animations: React Native Reanimated 3
+
+### Backend & Infrastructure
+- Database + Auth + Storage: Supabase (PostgreSQL)
+- Edge Functions: Supabase Edge Functions (Deno/TypeScript)
+- Media storage: Cloudflare R2 (images, videos)
+- Video streaming: Cloudflare Stream
+- Deployment (web): Vercel
+- Deployment (backend): Supabase hosted
+
+### AI Layer
+- Primary model: Anthropic Claude API (claude-sonnet-4-20250514)
+- Use streaming responses for chat interfaces
+- Never use OpenAI, Gemini, or any other provider without explicit discussion
+
+### Analytics & Monitoring
+- User analytics: Plausible (privacy-first, no fingerprinting, no user tracking across sites)
+- Error monitoring: Sentry
+- Never use Google Analytics, Mixpanel, or any tool that builds user profiles for ad targeting
+
+---
+
+## 3. PROJECT FOLDER STRUCTURE
+
+Enforce this structure exactly. Do not create files outside it without asking.
+
+```
+/serene-web                        ← Next.js web app
+  /app
+    /api                           ← API route handlers
+      /feed/route.ts
+      /ai/post-companion/route.ts
+      /ai/wellness-chat/route.ts
+      /ai/personality-update/route.ts
+      /ads/next/route.ts
+      /ads/dismiss/route.ts
+      /creator/post/route.ts
+      /creator/analytics/[userId]/route.ts
+      /creator/schedule/route.ts
+    /(auth)                        ← Auth group (login, signup, onboarding)
+      /login/page.tsx
+      /signup/page.tsx
+      /onboarding/page.tsx
+    /(app)                         ← Main app group (requires auth)
+      /feed/page.tsx
+      /discover/page.tsx
+      /create/page.tsx
+      /profile/[username]/page.tsx
+      /companion/page.tsx
+      /settings/page.tsx
+    /layout.tsx
+    /page.tsx
+  /components
+    /feed                          ← Feed-specific components
+    /post                          ← Post card, creation, viewer
+    /story                         ← Story ring, viewer, creator
+    /wellness                      ← Rest screen, session timer, nudges
+    /companion                     ← AI chat interface
+    /ads                           ← Ethical ad card
+    /creator                       ← Dashboard, analytics, scheduler
+    /ui                            ← shadcn/ui components (auto-generated here)
+    /layout                        ← Nav, sidebar, shell components
+  /lib
+    /supabase                      ← Supabase client (browser + server + admin)
+    /ai                            ← Anthropic API wrapper, prompts
+    /feed                          ← Feed scoring algorithm (server-side)
+    /wellness                      ← Session tracking, nudge logic
+    /ads                           ← Ad serving and filtering logic
+    /utils.ts                      ← Shared utility functions
+  /hooks
+    /use-wellness.ts
+    /use-feed.ts
+    /use-session.ts
+    /use-ai-companion.ts
+    /use-post.ts
+  /types
+    /database.ts                   ← Generated Supabase types
+    /feed.ts
+    /wellness.ts
+    /ai.ts
+    /ads.ts
+  /context
+    /wellness-context.tsx          ← Global session tracking provider (exports WellnessContext)
+    /user-context.tsx              ← Exports UserContext
+  /supabase
+    /migrations                    ← SQL migration files
+    /functions                     ← Edge functions
+      /feed/index.ts
+      /personality-update/index.ts
+
+/serene-mobile                     ← Expo React Native app
+  /app                             ← Expo Router file-based navigation
+    /(auth)
+    /(tabs)
+      /index.tsx                   ← Home feed
+      /discover.tsx
+      /create.tsx
+      /profile.tsx
+      /companion.tsx
+  /components                      ← Same logical structure as web
+  /hooks
+  /lib
+  /types
+```
+
+---
+
+## 4. DATABASE SCHEMA
+
+All tables use UUID primary keys. All timestamps are `timestamptz`. Enable Row Level Security (RLS) on every table — write the policies alongside the table creation.
+
+### users
+```sql
+id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+username text UNIQUE NOT NULL
+display_name text NOT NULL
+avatar_url text
+bio text
+personality_type text CHECK (personality_type IN (
+  'creative', 'nature_lover', 'homebody', 'adventurer', 'intellectual', 'caregiver'
+))
+wellness_score int DEFAULT 50 CHECK (wellness_score BETWEEN 0 AND 100)
+daily_session_minutes int DEFAULT 0
+onboarding_completed boolean DEFAULT false
+created_at timestamptz DEFAULT now()
+updated_at timestamptz DEFAULT now()
+```
+
+### posts
+```sql
+id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+user_id uuid REFERENCES users(id) ON DELETE CASCADE NOT NULL
+content_type text CHECK (content_type IN ('photo', 'video', 'story', 'text', 'slow_post'))
+caption text
+media_urls text[]
+mood_tag text CHECK (mood_tag IN (
+  'joyful', 'grateful', 'peaceful', 'reflective', 'creative', 'adventurous'
+))
+ai_sentiment_score float CHECK (ai_sentiment_score BETWEEN -1 AND 1)
+ai_companion_message text
+is_story boolean DEFAULT false
+story_expires_at timestamptz
+scheduled_for timestamptz
+is_published boolean DEFAULT true
+created_at timestamptz DEFAULT now()
+```
+
+### follows
+```sql
+follower_id uuid REFERENCES users(id) ON DELETE CASCADE
+following_id uuid REFERENCES users(id) ON DELETE CASCADE
+created_at timestamptz DEFAULT now()
+PRIMARY KEY (follower_id, following_id)
+```
+
+### resonances (replaces "likes" — no public count)
+```sql
+id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+post_id uuid REFERENCES posts(id) ON DELETE CASCADE
+user_id uuid REFERENCES users(id) ON DELETE CASCADE
+created_at timestamptz DEFAULT now()
+UNIQUE (post_id, user_id)
+```
+
+### comments
+```sql
+id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+post_id uuid REFERENCES posts(id) ON DELETE CASCADE
+user_id uuid REFERENCES users(id) ON DELETE CASCADE
+content text NOT NULL
+created_at timestamptz DEFAULT now()
+```
+
+### wellness_events
+```sql
+id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+user_id uuid REFERENCES users(id) ON DELETE CASCADE
+event_type text CHECK (event_type IN (
+  'session_start', 'session_end', 'post_impression', 'rest_nudge_shown',
+  'rest_accepted', 'rest_declined', 'daily_limit_reached', 'breathing_completed'
+))
+metadata jsonb DEFAULT '{}'
+created_at timestamptz DEFAULT now()
+```
+
+### personality_profiles (private — never exposed via public API)
+```sql
+user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE
+interests text[]
+mood_history jsonb DEFAULT '[]'     ← last 30 days only, auto-pruned
+time_preferences jsonb DEFAULT '{}'  ← {morning: [...mood_tags], evening: [...]}
+inferred_values text[]               ← health, mindfulness, creativity, connection, nature
+interaction_graph jsonb DEFAULT '{}'  ← {followed_user_id: score, ...}
+updated_at timestamptz DEFAULT now()
+```
+
+### ads
+```sql
+id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+advertiser_name text NOT NULL
+headline text NOT NULL
+body text
+cta_text text
+cta_url text
+image_url text
+allowed_categories text[]    ← must be from approved list only
+personality_tags text[]
+wellness_tags text[]
+time_of_day text[]
+is_active boolean DEFAULT true
+created_at timestamptz DEFAULT now()
+```
+
+### ad_impressions
+```sql
+id uuid PRIMARY KEY DEFAULT gen_random_uuid()
+user_id uuid REFERENCES users(id)
+ad_id uuid REFERENCES ads(id)
+dismissed boolean DEFAULT false
+clicked boolean DEFAULT false
+shown_at timestamptz DEFAULT now()
+```
+
+---
+
+## 5. NAMING CONVENTIONS
+
+- Files: kebab-case for all files (`post-card.tsx`, `use-wellness.ts`)
+- Components: PascalCase exports (`PostCard`, `WellnessNudge`)
+- Hooks: camelCase with `use` prefix (`useWellness`, `useFeed`)
+- Database tables: snake_case plural (`wellness_events`, `personality_profiles`)
+- API routes: kebab-case paths (`/api/ai/post-companion`)
+- Environment variables: SCREAMING_SNAKE_CASE with `SERENE_` prefix
+  - Browser-accessible vars (Next.js requires `NEXT_PUBLIC_` prefix for client reads):
+    - `NEXT_PUBLIC_SERENE_SUPABASE_URL`
+    - `NEXT_PUBLIC_SERENE_SUPABASE_ANON_KEY`
+  - Server-only vars (never expose to client):
+    - `SERENE_SUPABASE_SERVICE_KEY`
+    - `SERENE_ANTHROPIC_API_KEY`
+    - `SERENE_R2_BUCKET_URL`
+    - `SERENE_R2_ACCESS_KEY_ID`
+    - `SERENE_R2_SECRET_ACCESS_KEY`
+    - `SERENE_CLOUDFLARE_STREAM_TOKEN`
+    - `SERENE_CLOUDFLARE_ACCOUNT_ID`
+
+---
+
+## 6. DESIGN SYSTEM RULES
+
+These are not aesthetic preferences. They are product decisions tied to the wellness philosophy.
+
+### Color palette (Tailwind custom config)
+```js
+colors: {
+  cream: {
+    50: '#FDFBF7',
+    100: '#F9F5EE',
+    200: '#F0E9DA',
+  },
+  sage: {
+    100: '#E8EFE4',
+    200: '#C9DBC2',
+    400: '#87AA7E',
+    600: '#4E7A44',
+    800: '#2C4827',
+  },
+  slate: {
+    warm: '#4A4A45',
+    muted: '#7A7A74',
+    hint: '#ADADAA',
+  },
+  sky: {
+    soft: '#EAF2F8',
+    mid: '#A8C8E0',
+    deep: '#4A8AB5',
+  },
+  amber: {
+    warm: '#F2A65A',
+    glow: '#E8845A',
+  }
+}
+```
+
+### Typography
+- Body text: minimum 16px, line-height 1.7
+- Never use pure black (#000) or pure white (#FFF) — use cream-50 and slate-warm
+- Headings: font-weight 500 only, never 700 (too aggressive)
+- Font family: `'Instrument Serif'` for display/headings, `'DM Sans'` for UI/body
+
+### Spacing
+- Generous padding: minimum p-6 on cards, p-8 on screens
+- Content breathes — never pack elements tightly
+
+### What is NEVER allowed in the UI
+- Red notification badges or dot counts
+- Countdown timers or urgency indicators
+- "X people are watching this" or similar social proof pressure
+- Follower/following counts shown publicly on feeds or profile cards (only on own profile in settings)
+- Like/resonance counts shown on posts in the feed (only visible to the post author)
+- "Trending" labels or sections in the main feed
+- Autoplay video with sound
+- Pop-up modals that interrupt browsing (full-screen gentle overlays are fine)
+- Push notifications for: like counts, follower milestones, "you haven't posted in X days"
+
+---
+
+## 7. THE WELLNESS ENGINE — CORE BEHAVIOURAL RULES
+
+The WellnessContext wraps the entire app. It must be implemented before any feed or content features.
+
+### Session time thresholds
+- 20 minutes: Show soft top banner — dismiss with one tap, no guilt
+- 40 minutes: Blur feed, show full-screen rest screen (cannot be immediately dismissed — 5 second minimum)
+- 60 minutes: Lock feed for 10 minutes, show breathing exercise
+
+### Rest screen requirements
+- Full screen, not a modal
+- Background: rotating Unsplash nature image (curated: forest, ocean, mountain, sky — never cities or crowds)
+- AI-generated affirming message based on user's recent mood
+- Animated breathing circle (4s inhale, 4s hold, 4s exhale)
+- Two options: "I'm done for now" (primary, large) and "Keep browsing" (secondary, small, appears after 5 seconds)
+- Log user choice to wellness_events
+
+### Daily feed cap
+- 30 post impressions per day maximum (main feed)
+- After cap: show end screen, not an error
+- End screen message: warm, affirming, never guilt-inducing
+- Discovery tab: 10 posts, refreshes once at midnight only
+
+---
+
+## 8. FEED ALGORITHM — INVIOLABLE RULES
+
+The feed algorithm lives in `/supabase/functions/feed/index.ts` and `/lib/feed/`.
+
+### Scoring weights
+- Relationship depth: 40%
+- Mood-time fit: 30%
+- Recency (linear decay over 48h): 20%
+- Serendipity (stable random, seeded by user_id + date): 10%
+
+### Hard constraints — never override these
+- Never ORDER BY or weight by: likes count, comments count, shares, follower count, watch time, viral velocity
+- Never surface a "trending" feed or sort
+- Maximum 2 consecutive posts from the same creator
+- Posts older than 48 hours are excluded from main feed entirely
+- Return maximum 15 posts per page request
+- Enforce 30-post daily cap server-side (not just client-side)
+
+### Interaction graph scoring
+```
+score += 4.0  for each DM exchanged
+score += 3.0  for each reply to their post
+score += 2.5  for each post saved
+score += 1.5  for each comment left
+score -= 0.5  for each "scrolled past" event (tracked server-side)
+```
+Cache interaction graph in personality_profiles.interaction_graph, update async.
+
+---
+
+## 9. AI LAYER — ANTHROPIC INTEGRATION
+
+### Model
+Always use: `claude-sonnet-4-20250514`
+Always set: `max_tokens: 1024` for companion messages, `max_tokens: 256` for post analysis
+
+### Post companion system prompt
+```
+You are the Serene companion — a warm, grounding presence for this user.
+When responding to their post, be specific about the actual content: the light, the moment, the detail they chose to share.
+Do not say: "Great photo!", "Love this!", "Beautiful!", or any generic affirmation.
+Do say: something specific about what you actually see or feel in the content.
+Ask one gentle, open-ended question if appropriate. Keep your response under 3 sentences.
+Never suggest the user needs more followers, more engagement, or to post more often.
+Respond in the same language the user wrote their caption in.
+```
+
+### Wellness chat system prompt
+```
+You are the Serene companion. You are warm, grounding, and calm.
+You are not a therapist and do not provide clinical advice.
+When users share struggles, validate their feeling briefly, then gently redirect toward something grounding (breath, the present moment, something small and good).
+If a user expresses crisis-level distress or mentions self-harm, always provide crisis resources immediately and encourage them to reach out to a professional.
+Keep responses short (2-4 sentences) unless the user is clearly seeking a longer conversation.
+Never ask multiple questions at once.
+```
+
+### What the AI must never do
+- Generate comparative statements ("other people feel this way too" framing that implies competition)
+- Suggest users post more, engage more, or grow their audience
+- Reference metrics, follower counts, or popularity
+- Provide clinical diagnosis or therapy
+- Generate content that could be mistaken for crisis counselling
+
+---
+
+## 10. ETHICAL ADS — HARD CONSTRAINTS
+
+### Allowed ad categories (whitelist — nothing outside this list)
+```
+mental_health_apps
+physical_wellness          ← yoga, fitness, physiotherapy
+healthy_food_cooking       ← ingredients, cookware, meal prep
+nature_outdoor_activities  ← hiking, gardening, camping
+creativity_tools           ← art supplies, music, writing tools
+education                  ← courses, books, learning platforms
+sustainable_products       ← eco-friendly goods with verified claims
+sleep_aids                 ← non-pharmaceutical
+local_community_events
+```
+
+### Blocked ad categories (blacklist — enforce at insertion, not just display)
+```
+fast_fashion
+gambling
+alcohol
+tobacco
+weight_loss (unless prescribed medical programme with verification)
+beauty_filters_or_surgery
+social_comparison_products (anything marketed with "get more followers", "go viral", etc.)
+fomo_promotions (flash sales, countdown timers, "only X left")
+cryptocurrency
+financial_trading
+```
+
+### Ad placement rules
+- Maximum 1 ad per 10 posts in feed
+- Ad must be clearly labeled "Partner" — never disguised as organic content
+- No ad retargeting based on behaviour outside Serene
+- No third-party ad pixels or tracking scripts
+- Targeting uses only: personality_type, mood_tag preferences, time_of_day (never demographic data)
+- Users can dismiss any ad category permanently
+
+---
+
+## 11. SECURITY & PRIVACY RULES
+
+- All personality_profile data: RLS policy allows only the owning user to read/write
+- Never expose personality_profile data via any public API endpoint
+- Never log post content or captions to any analytics service
+- Interaction graph: stored server-side only, never sent to client
+- Ad targeting: computed server-side, the client never receives the targeting reason (only the ad itself)
+- Session duration: tracked in wellness_events, never sent to third parties
+- Media uploads: validate file type server-side (not just client-side), scan for CSAM via PhotoDNA or equivalent before storage
+- Auth: use Supabase Auth with email + OAuth (Google, Apple). Implement PKCE flow for mobile.
+- Rate limiting: implement on all AI endpoints (max 20 companion messages per user per hour)
+
+---
+
+## 12. WHAT TO DO BEFORE WRITING ANY CODE
+
+When starting a new feature or session:
+
+1. Re-read sections 6, 7, 8, and 9 of this file
+2. Confirm the feature does not violate any rule in sections 6, 7, 8, 9, 10, or 11
+3. Identify which database tables the feature touches
+4. Identify which RLS policies need to exist or be updated
+5. Identify whether the feature needs an AI call — if so, confirm which system prompt applies
+6. Propose the implementation plan in plain English before writing code
+7. Write types first, then server logic, then UI components
+
+---
+
+## 13. FEATURE PRIORITY ORDER (build in this sequence)
+
+### Phase 1 — Foundation
+1. Database schema + RLS policies (all tables)
+2. Supabase Auth (email + Google OAuth)
+3. WellnessContext (session tracking, time thresholds)
+4. Basic user profile (create, edit, view)
+
+### Phase 2 — Core Social
+5. Post creation (photo, text, mood tag)
+6. Feed algorithm (Edge Function)
+7. Follow system
+8. Resonance system (no public counts)
+9. Comments
+
+### Phase 3 — AI Layer
+10. Post companion (AI message on upload)
+11. Personality profile builder (passive, from posts)
+12. Wellness chat companion
+
+### Phase 4 — Wellness Features
+13. Rest screen + breathing exercise
+14. Daily cap + end screen
+15. Discovery tab
+
+### Phase 5 — Creator Tools
+16. Stories (24hr)
+17. Video posts
+18. Creator analytics dashboard
+19. Post scheduler
+
+### Phase 6 — Monetisation
+20. Ethical ads system
+21. Creator subscriptions (Stripe)
+22. Tip jar
+
+---
+
+## 14. HOW TO HANDLE AMBIGUITY
+
+If a feature request or user story is ambiguous, default to the more conservative, wellness-preserving interpretation. Examples:
+
+- "Show post engagement" → show only to the post author, never publicly
+- "Notify the user" → ask whether this serves the user or serves engagement before implementing
+- "Add a trending section" → do not implement. Raise this with the team first.
+- "Increase session time" → this is never a goal. Reframe the metric.
+- "Recommend content" → use personality-based curation only, never viral-signal-based
+
+When genuinely unsure, add a `// WELLNESS-CHECK:` comment explaining the decision made and why, so it can be reviewed.
+
+---
+
+## 15. DEFINITION OF DONE
+
+A feature is done when:
+- [ ] TypeScript types are defined in `/types/`
+- [ ] RLS policies exist for all database operations
+- [ ] No `any` types in production code
+- [ ] Mobile and web implementations are in sync
+- [ ] The WellnessContext session timer is not disrupted
+- [ ] No engagement metrics are exposed publicly
+- [ ] Error states are handled gracefully (no raw error messages shown to users)
+- [ ] Loading states use skeleton screens, not spinners
+- [ ] The feature has been checked against sections 6, 7, 8, 9, 10, and 11 of this file
+
+---
+
+*This file is the single source of truth for Serene. If code conflicts with this file, the code is wrong.*
+*Last updated: project inception. Update this file when architectural decisions change — not after.*

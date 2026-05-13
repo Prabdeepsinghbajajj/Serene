@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef, useEffect } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import AsyncStorage from '@react-native-async-storage/async-storage'
-import { apiStream } from '@/lib/api'
+import { apiFetch } from '@/lib/api'
 import { containsCrisisLanguage } from '@/types/ai'
 import type { CompanionMessage } from '@/types/ai'
 
@@ -30,7 +30,6 @@ export function useAICompanion() {
   const [isStreaming, setIsStreaming] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showCrisisCard, setShowCrisisCard] = useState(false)
-  const abortRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     loadMessages().then((stored) => {
@@ -43,76 +42,56 @@ export function useAICompanion() {
       if (!content.trim() || isStreaming) return
       setError(null)
 
-      if (containsCrisisLanguage(content)) {
-        setShowCrisisCard(true)
-      }
+      if (containsCrisisLanguage(content)) setShowCrisisCard(true)
 
-      const userMessage: CompanionMessage = {
+      const userMsg: CompanionMessage = {
         id: Math.random().toString(36).slice(2),
         role: 'user',
         content: content.trim(),
         timestamp: new Date(),
       }
-
-      const updatedMessages = [...messages, userMessage]
-      setMessages(updatedMessages)
-      await saveMessages(updatedMessages)
-
-      const assistantMessage: CompanionMessage = {
+      const assistantMsg: CompanionMessage = {
         id: Math.random().toString(36).slice(2),
         role: 'assistant',
         content: '',
         timestamp: new Date(),
       }
-      const withAssistant = [...updatedMessages, assistantMessage]
-      setMessages(withAssistant)
+
+      const withUser = [...messages, userMsg]
+      setMessages([...withUser, assistantMsg])
+      await saveMessages(withUser)
 
       setIsStreaming(true)
-      abortRef.current = new AbortController()
 
       try {
-        const response = await apiStream('/api/ai/wellness-chat', {
-          method: 'POST',
-          body: JSON.stringify({
-            messages: updatedMessages.map((m) => ({
-              role: m.role,
-              content: m.content,
-            })),
-            lastUserMessage: content,
-          }),
-          signal: abortRef.current.signal,
-        })
+        const data = await apiFetch<{ message: string }>(
+          '/api/ai/wellness-chat-mobile',
+          {
+            method: 'POST',
+            body: JSON.stringify({
+              messages: withUser
+                .map((m) => ({ role: m.role, content: m.content }))
+                .filter((m) => m.content.trim().length > 0)
+                .slice(-10),
+              lastUserMessage: content,
+            }),
+          }
+        )
 
-        if (!response.body) throw new Error('No response body.')
+        const fullText = data.message
+        if (!fullText) throw new Error('Empty response from companion.')
 
-        const reader = response.body.getReader()
-        const decoder = new TextDecoder()
-        let accumulated = ''
-
-        while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          accumulated += decoder.decode(value, { stream: true })
-          setMessages((prev) => {
-            const updated = [...prev]
-            const lastIdx = updated.length - 1
-            updated[lastIdx] = { ...updated[lastIdx], content: accumulated }
-            return updated
-          })
-        }
-
-        setMessages((prev) => {
-          saveMessages(prev)
-          return prev
-        })
+        const finalMessages: CompanionMessage[] = [
+          ...withUser,
+          { ...assistantMsg, content: fullText },
+        ]
+        setMessages(finalMessages)
+        await saveMessages(finalMessages)
       } catch (err) {
-        if ((err as Error).name === 'AbortError') return
+        console.error('Companion error:', err)
+        setMessages(withUser)
+        await saveMessages(withUser)
         setError('Something went wrong. Please try again.')
-        setMessages((prev) => {
-          const cleaned = prev.filter((m) => m.id !== assistantMessage.id)
-          saveMessages(cleaned)
-          return cleaned
-        })
       } finally {
         setIsStreaming(false)
       }

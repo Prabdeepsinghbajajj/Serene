@@ -54,6 +54,7 @@ export async function apiFetch<T>(
     ...options,
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
       Cookie: cookieHeader,
       ...((options?.headers ?? {}) as Record<string, string>),
     },
@@ -67,22 +68,23 @@ export async function apiFetch<T>(
   return response.json() as Promise<T>
 }
 
-export async function apiStream(path: string, options?: RequestInit): Promise<Response> {
+export async function apiStream(path: string, body: unknown): Promise<Response> {
   const { data: { session } } = await supabase.auth.getSession()
   if (!session) throw new Error('Not authenticated')
   const cookieHeader = buildAuthCookieHeader(JSON.stringify(session))
   const url = `${process.env.EXPO_PUBLIC_API_URL}${path}`
   const response = await fetch(url, {
-    ...options,
+    method: 'POST',
     headers: {
       'Content-Type': 'application/json',
+      Authorization: `Bearer ${session.access_token}`,
       Cookie: cookieHeader,
-      ...((options?.headers ?? {}) as Record<string, string>),
     },
+    body: JSON.stringify(body),
   })
   if (!response.ok) {
-    const body = await response.json().catch(() => ({})) as Record<string, string>
-    throw new Error(body.error ?? `HTTP ${response.status}`)
+    const errBody = await response.json().catch(() => ({})) as Record<string, string>
+    throw new Error(errBody.error ?? `HTTP ${response.status}`)
   }
   return response
 }

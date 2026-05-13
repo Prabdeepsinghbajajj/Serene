@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(EXPO_NO_DOTENV=0 npx expo export --platform ios --output-dir /tmp/serene-export)"
+    ]
+  }
+}

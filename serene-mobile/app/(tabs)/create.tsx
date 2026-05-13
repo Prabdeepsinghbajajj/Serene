@@ -101,15 +101,16 @@ export default function CreateScreen() {
   }, [])
 
   const uploadMedia = useCallback(async (uri: string): Promise<string> => {
+    const { data: { user } } = await supabase.auth.getUser()
     const response = await fetch(uri)
     const blob = await response.blob()
-    const ext = uri.split('.').pop() ?? 'jpg'
-    const path = `posts/${Date.now()}.${ext}`
+    const ext = uri.split('.').pop()?.split('?')[0] ?? 'jpg'
+    const filePath = `${user?.id ?? 'unknown'}/${Date.now()}.${ext}`
     const { error: uploadError } = await supabase.storage
-      .from('media')
-      .upload(path, blob, { contentType: blob.type || 'image/jpeg' })
+      .from('posts')
+      .upload(filePath, blob, { contentType: blob.type || 'image/jpeg', upsert: false })
     if (uploadError) throw uploadError
-    const { data } = supabase.storage.from('media').getPublicUrl(path)
+    const { data } = supabase.storage.from('posts').getPublicUrl(filePath)
     return data.publicUrl
   }, [])
 

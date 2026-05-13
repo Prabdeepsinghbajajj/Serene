@@ -2,18 +2,22 @@ import { View, StyleSheet } from 'react-native'
 import { Tabs } from 'expo-router'
 import { Home, Compass, Plus, User, Leaf } from 'lucide-react-native'
 
-function TabBarBackground() {
-  return <View style={[StyleSheet.absoluteFill, styles.tabBarBg]} />
-}
-
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarStyle: {
+          backgroundColor: '#1A1A18',
+          borderTopColor: 'rgba(255,255,255,0.06)',
+          borderTopWidth: 1,
+        },
         tabBarActiveTintColor: '#8ABD80',
         tabBarInactiveTintColor: 'rgba(245,240,232,0.3)',
-        tabBarBackground: () => <TabBarBackground />,
+        tabBarLabelStyle: {
+          fontSize: 10,
+          fontWeight: '500',
+        },
       }}
     >
       <Tabs.Screen
@@ -68,11 +72,6 @@ export default function TabsLayout() {
 }
 
 const styles = StyleSheet.create({
-  tabBarBg: {
-    backgroundColor: '#1A1A18',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.08)',
-  },
   createIcon: {
     width: 40,
     height: 40,

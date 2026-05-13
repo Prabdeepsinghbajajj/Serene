@@ -13,13 +13,57 @@ import {
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
+import { useFonts, CormorantGaramond_400Regular } from '@expo-google-fonts/cormorant-garamond'
+import Svg, { Path, G, ClipPath, Rect, Defs } from 'react-native-svg'
 import { supabase } from '@/lib/supabase'
+
+/* -------------------------------------------------------------------------- */
+/*  Google "G" icon                                                             */
+/* -------------------------------------------------------------------------- */
+
+function GoogleIcon() {
+  return (
+    <Svg width="18" height="18" viewBox="0 0 48 48">
+      <Defs>
+        <ClipPath id="clip">
+          <Rect width="48" height="48" />
+        </ClipPath>
+      </Defs>
+      <G clipPath="url(#clip)">
+        <Path
+          fill="#4285F4"
+          d="M47.5 24.6c0-1.6-.1-3.1-.4-4.6H24v8.7h13.2c-.6 3-2.3 5.5-5 7.2v6h8c4.7-4.3 7.3-10.7 7.3-17.3z"
+        />
+        <Path
+          fill="#34A853"
+          d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.8-6c-2.1 1.4-4.9 2.3-8.1 2.3-6.2 0-11.5-4.2-13.4-9.9H2.5v6.2C6.5 42.6 14.7 48 24 48z"
+        />
+        <Path
+          fill="#FBBC05"
+          d="M10.6 28.6c-.5-1.4-.8-2.9-.8-4.6s.3-3.2.8-4.6v-6.2H2.5C.9 16.5 0 20.1 0 24s.9 7.5 2.5 10.8l8.1-6.2z"
+        />
+        <Path
+          fill="#EA4335"
+          d="M24 9.5c3.5 0 6.6 1.2 9.1 3.5l6.8-6.8C35.9 2.4 30.5 0 24 0 14.7 0 6.5 5.4 2.5 13.2l8.1 6.2C12.5 13.7 17.8 9.5 24 9.5z"
+        />
+      </G>
+    </Svg>
+  )
+}
+
+/* -------------------------------------------------------------------------- */
+/*  Error mapping                                                               */
+/* -------------------------------------------------------------------------- */
 
 function mapAuthError(message: string): string {
   if (message.includes('Invalid login credentials')) return 'Email or password is incorrect.'
   if (message.includes('Email not confirmed')) return 'Please check your email to confirm your account first.'
   return 'Something went wrong. Please try again.'
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Screen                                                                      */
+/* -------------------------------------------------------------------------- */
 
 export default function LoginScreen() {
   const router = useRouter()
@@ -29,26 +73,19 @@ export default function LoginScreen() {
   const [googleLoading, setGoogleLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const [fontsLoaded] = useFonts({ CormorantGaramond_400Regular })
+
   async function handleSignIn() {
     if (!email.trim() || !password) return
     setLoading(true)
     setError(null)
-
-    const { data, error } = await supabase.auth.signInWithPassword({
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
       password,
     })
     setLoading(false)
-
-    if (error) { setError(mapAuthError(error.message)); return }
-    if (data.user) {
-      const { data: profile } = await supabase
-        .from('users')
-        .select('onboarding_completed')
-        .eq('id', data.user.id)
-        .single()
-      router.replace(profile?.onboarding_completed ? '/(tabs)/' : '/(auth)/onboarding')
-    }
+    if (error) setError(mapAuthError(error.message))
+    // Navigation is handled by onAuthStateChange in _layout.tsx
   }
 
   async function handleGoogleSignIn() {
@@ -56,7 +93,10 @@ export default function LoginScreen() {
     setError(null)
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: 'serene://auth/callback' },
+      options: {
+        redirectTo: 'serene://auth/callback',
+        skipBrowserRedirect: false,
+      },
     })
     setGoogleLoading(false)
     if (error) { setError('Google sign-in failed. Please try again.'); return }
@@ -73,16 +113,21 @@ export default function LoginScreen() {
           contentContainerStyle={styles.scroll}
           keyboardShouldPersistTaps="handled"
         >
-          {/* Logo */}
-          <Text style={styles.logo}>Serene</Text>
+          {/* Wordmark */}
+          <Text
+            style={[
+              styles.wordmark,
+              fontsLoaded && { fontFamily: 'CormorantGaramond_400Regular' },
+            ]}
+          >
+            Serene
+          </Text>
+
+          {/* Subtitle */}
+          <Text style={styles.subtitle}>Welcome back</Text>
 
           {/* Card */}
           <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Welcome back</Text>
-              <Text style={styles.cardSubtitle}>Your space is waiting.</Text>
-            </View>
-
             {/* Email */}
             <View style={styles.fieldGroup}>
               <Text style={styles.label}>EMAIL</Text>
@@ -91,7 +136,7 @@ export default function LoginScreen() {
                 value={email}
                 onChangeText={setEmail}
                 placeholder="you@example.com"
-                placeholderTextColor="rgba(245,240,232,0.3)"
+                placeholderTextColor="rgba(245,240,232,0.25)"
                 keyboardType="email-address"
                 autoCapitalize="none"
                 autoComplete="email"
@@ -107,7 +152,7 @@ export default function LoginScreen() {
                 value={password}
                 onChangeText={setPassword}
                 placeholder="••••••••"
-                placeholderTextColor="rgba(245,240,232,0.3)"
+                placeholderTextColor="rgba(245,240,232,0.25)"
                 secureTextEntry
                 autoComplete="current-password"
                 returnKeyType="done"
@@ -124,7 +169,7 @@ export default function LoginScreen() {
             {/* Error */}
             {error && <Text style={styles.error}>{error}</Text>}
 
-            {/* Sign In */}
+            {/* Sign in */}
             <TouchableOpacity
               style={[styles.primaryBtn, loading && styles.btnDisabled]}
               onPress={handleSignIn}
@@ -146,15 +191,19 @@ export default function LoginScreen() {
 
             {/* Google */}
             <TouchableOpacity
-              style={[styles.secondaryBtn, googleLoading && styles.btnDisabled]}
+              style={[styles.googleBtn, googleLoading && styles.btnDisabled]}
               onPress={handleGoogleSignIn}
               disabled={googleLoading}
               activeOpacity={0.85}
             >
-              {googleLoading
-                ? <ActivityIndicator color="rgba(245,240,232,0.7)" size="small" />
-                : <Text style={styles.secondaryBtnText}>Continue with Google</Text>
-              }
+              {googleLoading ? (
+                <ActivityIndicator color="rgba(245,240,232,0.7)" size="small" />
+              ) : (
+                <View style={styles.googleRow}>
+                  <GoogleIcon />
+                  <Text style={styles.googleBtnText}>Continue with Google</Text>
+                </View>
+              )}
             </TouchableOpacity>
 
             {/* Sign up link */}
@@ -178,17 +227,27 @@ const styles = StyleSheet.create({
   },
   scroll: {
     flexGrow: 1,
-    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 24,
     paddingVertical: 32,
   },
-  logo: {
-    textAlign: 'center',
-    fontSize: 36,
+  wordmark: {
+    fontSize: 40,
     color: '#8ABD80',
-    marginBottom: 32,
+    textAlign: 'center',
+    marginTop: 48,
+    marginBottom: 8,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: 'rgba(245,240,232,0.5)',
+    fontWeight: '300',
+    textAlign: 'center',
+    marginBottom: 40,
   },
   card: {
+    width: '100%',
+    maxWidth: 400,
     backgroundColor: 'rgba(255,255,255,0.03)',
     borderRadius: 20,
     padding: 28,
@@ -196,21 +255,13 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.08)',
     gap: 20,
   },
-  cardHeader: { gap: 4 },
-  cardTitle: {
-    fontSize: 26,
-    color: '#F5F0E8',
-    fontWeight: '300',
-  },
-  cardSubtitle: {
-    fontSize: 14,
-    color: 'rgba(245,240,232,0.4)',
-  },
   fieldGroup: { gap: 6 },
   label: {
     fontSize: 11,
-    letterSpacing: 1.2,
-    color: 'rgba(245,240,232,0.5)',
+    fontWeight: '600',
+    letterSpacing: 2,
+    color: 'rgba(245,240,232,0.4)',
+    textTransform: 'uppercase',
   },
   input: {
     backgroundColor: 'rgba(255,255,255,0.06)',
@@ -231,53 +282,60 @@ const styles = StyleSheet.create({
     color: '#8ABD80',
   },
   error: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#D4883A',
     textAlign: 'center',
   },
   primaryBtn: {
     backgroundColor: '#4E7A44',
-    borderRadius: 32,
+    borderRadius: 100,
     paddingVertical: 16,
     alignItems: 'center',
   },
   primaryBtnText: {
-    color: '#F5F0E8',
-    fontSize: 15,
+    color: '#fff',
+    fontSize: 13,
     fontWeight: '700',
-    letterSpacing: 1,
+    letterSpacing: 2,
   },
   btnDisabled: { opacity: 0.55 },
   divider: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+    marginVertical: -4,
   },
   dividerLine: {
     flex: 1,
     height: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: 'rgba(255,255,255,0.10)',
   },
   dividerText: {
     fontSize: 13,
-    color: 'rgba(245,240,232,0.25)',
+    color: 'rgba(255,255,255,0.15)',
   },
-  secondaryBtn: {
+  googleBtn: {
     backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 32,
+    borderRadius: 100,
     paddingVertical: 14,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.08)',
   },
-  secondaryBtnText: {
+  googleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  googleBtnText: {
     color: 'rgba(245,240,232,0.7)',
-    fontSize: 15,
+    fontSize: 14,
   },
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
+    marginTop: 4,
   },
   footerText: {
     fontSize: 14,
