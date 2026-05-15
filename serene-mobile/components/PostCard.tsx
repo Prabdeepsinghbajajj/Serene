@@ -7,9 +7,13 @@ import {
   StyleSheet,
   Animated,
   Alert,
+  TextInput,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native'
 import * as Haptics from 'expo-haptics'
-import { Leaf, MessageCircle } from 'lucide-react-native'
+import { Leaf, MessageCircle, Send } from 'lucide-react-native'
 import type { FeedPost } from '@/types/feed'
 import { formatRelativeTime, getInitials } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
@@ -68,22 +72,42 @@ function Avatar({ uri, name, isRecent }: { uri: string | null; name: string; isR
 }
 
 /* -------------------------------------------------------------------------- */
+/*  Comment types                                                               */
+/* -------------------------------------------------------------------------- */
+
+interface Comment {
+  id: string
+  content: string
+  created_at: string
+  user: {
+    id: string
+    display_name: string
+    avatar_url: string | null
+  }
+}
+
+/* -------------------------------------------------------------------------- */
 /*  PostCard                                                                    */
 /* -------------------------------------------------------------------------- */
 
 interface PostCardProps {
   post: FeedPost
   onResonance?: (postId: string) => void
-  onComment?: (postId: string) => void
   onDeleted?: () => void
 }
 
-export default function PostCard({ post, onResonance, onComment, onDeleted }: PostCardProps) {
+export default function PostCard({ post, onResonance, onDeleted }: PostCardProps) {
   const { creator, mood_tag, created_at, media_urls, content_type, caption, ai_companion_message, has_resonated } = post
 
   const mountAnim = useRef(new Animated.Value(0)).current
   const imageAnim = useRef(new Animated.Value(0)).current
   const [currentUserId, setCurrentUserId] = useState('')
+
+  const [commentsOpen, setCommentsOpen] = useState(false)
+  const [comments, setComments] = useState<Comment[]>([])
+  const [commentsLoading, setCommentsLoading] = useState(false)
+  const [commentText, setCommentText] = useState('')
+  const [isPosting, setIsPosting] = useState(false)
 
   useEffect(() => {
     Animated.timing(mountAnim, {
@@ -136,6 +160,68 @@ export default function PostCard({ post, onResonance, onComment, onDeleted }: Po
         },
       ]
     )
+  }
+
+  async function fetchComments() {
+    setCommentsLoading(true)
+    try {
+      const data = await apiFetch<{ comments: Comment[] }>(`/api/comments?post_id=${post.id}`)
+      setComments(data.comments ?? [])
+    } catch {
+      // keep existing comments
+    } finally {
+      setCommentsLoading(false)
+    }
+  }
+
+  function handleCommentToggle() {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {})
+    if (!commentsOpen) {
+      setCommentsOpen(true)
+      void fetchComments()
+    } else {
+      setCommentsOpen(false)
+    }
+  }
+
+  async function handlePostComment() {
+    const content = commentText.trim().slice(0, 500)
+    if (!content || isPosting) return
+    setIsPosting(true)
+    setCommentText('')
+    const optimisticId = `opt-${Date.now()}`
+    const optimistic: Comment = {
+      id: optimisticId,
+      content,
+      created_at: new Date().toISOString(),
+      user: { id: currentUserId, display_name: '...', avatar_url: null },
+    }
+    setComments((prev) => [...prev, optimistic])
+    try {
+      const data = await apiFetch<{ comment: Comment }>('/api/comments', {
+        method: 'POST',
+        body: JSON.stringify({ post_id: post.id, content }),
+      })
+      setComments((prev) => prev.map((c) => (c.id === optimisticId ? data.comment : c)))
+    } catch {
+      setComments((prev) => prev.filter((c) => c.id !== optimisticId))
+      setCommentText(content)
+    } finally {
+      setIsPosting(false)
+    }
+  }
+
+  async function handleDeleteComment(commentId: string) {
+    const prev = comments
+    setComments((c) => c.filter((x) => x.id !== commentId))
+    try {
+      await apiFetch('/api/comments', {
+        method: 'DELETE',
+        body: JSON.stringify({ comment_id: commentId }),
+      })
+    } catch {
+      setComments(prev)
+    }
   }
 
   return (
@@ -222,18 +308,100 @@ export default function PostCard({ post, onResonance, onComment, onDeleted }: Po
 
           <TouchableOpacity
             style={styles.actionBtn}
-            onPress={() => onComment?.(post.id)}
+            onPress={handleCommentToggle}
             activeOpacity={0.7}
-            accessibilityLabel="Comment on post"
+            accessibilityLabel={commentsOpen ? 'Close comments' : 'Open comments'}
             accessibilityRole="button"
           >
             <MessageCircle
               size={20}
-              color="rgba(245,240,232,0.3)"
+              color={commentsOpen ? '#8ABD80' : 'rgba(245,240,232,0.3)'}
               strokeWidth={1.8}
             />
           </TouchableOpacity>
         </View>
+
+        {/* ── Comment section ── */}
+        {commentsOpen && (
+          <View style={styles.commentSection}>
+            {/* Loading */}
+            {commentsLoading && comments.length === 0 && (
+              <ActivityIndicator color="#8ABD80" size="small" style={{ paddingVertical: 16 }} />
+            )}
+
+            {/* Empty */}
+            {!commentsLoading && comments.length === 0 && (
+              <Text style={styles.noComments}>Be the first to reply</Text>
+            )}
+
+            {/* Comment list */}
+            {comments.map((c) => {
+              const isOwn = !!currentUserId && c.user.id === currentUserId
+              return (
+                <View key={c.id} style={styles.commentRow}>
+                  <View style={styles.commentAvatar}>
+                    {c.user.avatar_url ? (
+                      <Image
+                        source={{ uri: c.user.avatar_url }}
+                        style={styles.commentAvatarImg}
+                      />
+                    ) : (
+                      <Text style={styles.commentAvatarInitial}>
+                        {c.user.display_name.slice(0, 1).toUpperCase()}
+                      </Text>
+                    )}
+                  </View>
+                  <View style={styles.commentBody}>
+                    <Text style={styles.commentAuthor}>{c.user.display_name}</Text>
+                    <Text style={styles.commentText}>{c.content}</Text>
+                  </View>
+                  {isOwn && !c.id.startsWith('opt-') && (
+                    <TouchableOpacity
+                      onPress={() => void handleDeleteComment(c.id)}
+                      hitSlop={8}
+                      style={styles.commentDeleteBtn}
+                    >
+                      <Text style={styles.commentDeleteText}>✕</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+              )
+            })}
+
+            {/* Input */}
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+              <View style={styles.commentInput}>
+                <TextInput
+                  style={styles.commentInputField}
+                  placeholder="Add a reply…"
+                  placeholderTextColor="rgba(245,240,232,0.2)"
+                  value={commentText}
+                  onChangeText={setCommentText}
+                  maxLength={500}
+                  returnKeyType="send"
+                  onSubmitEditing={() => void handlePostComment()}
+                  blurOnSubmit={false}
+                  editable={!isPosting}
+                />
+                <TouchableOpacity
+                  onPress={() => void handlePostComment()}
+                  disabled={!commentText.trim() || isPosting}
+                  style={[
+                    styles.commentSendBtn,
+                    (!commentText.trim() || isPosting) && styles.commentSendBtnDisabled,
+                  ]}
+                  accessibilityLabel="Send reply"
+                >
+                  {isPosting ? (
+                    <ActivityIndicator size="small" color="#8ABD80" />
+                  ) : (
+                    <Send size={16} color="#8ABD80" strokeWidth={1.8} />
+                  )}
+                </TouchableOpacity>
+              </View>
+            </KeyboardAvoidingView>
+          </View>
+        )}
       </View>
       </TouchableOpacity>
     </Animated.View>
@@ -391,5 +559,91 @@ const styles = StyleSheet.create({
   actionBtn: {
     paddingVertical: 12,
     paddingHorizontal: 18,
+  },
+
+  /* Comment section */
+  commentSection: {
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(0,0,0,0.12)',
+    paddingBottom: 4,
+  },
+  noComments: {
+    textAlign: 'center',
+    fontSize: 13,
+    color: 'rgba(245,240,232,0.25)',
+    paddingVertical: 16,
+  },
+  commentRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    gap: 8,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255,255,255,0.04)',
+  },
+  commentAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(78,122,68,0.25)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    overflow: 'hidden',
+    flexShrink: 0,
+  },
+  commentAvatarImg: {
+    width: 24,
+    height: 24,
+  },
+  commentAvatarInitial: {
+    fontSize: 10,
+    fontWeight: '600',
+    color: '#8ABD80',
+  },
+  commentBody: {
+    flex: 1,
+    gap: 2,
+  },
+  commentAuthor: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: 'rgba(245,240,232,0.65)',
+  },
+  commentText: {
+    fontSize: 13,
+    fontWeight: '300',
+    color: 'rgba(245,240,232,0.55)',
+    lineHeight: 19,
+  },
+  commentDeleteBtn: {
+    paddingLeft: 8,
+    paddingTop: 2,
+  },
+  commentDeleteText: {
+    fontSize: 11,
+    color: 'rgba(245,240,232,0.2)',
+  },
+  commentInput: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 8,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255,255,255,0.05)',
+  },
+  commentInputField: {
+    flex: 1,
+    fontSize: 13,
+    color: 'rgba(245,240,232,0.7)',
+    paddingVertical: 6,
+  },
+  commentSendBtn: {
+    padding: 6,
+  },
+  commentSendBtnDisabled: {
+    opacity: 0.3,
   },
 })

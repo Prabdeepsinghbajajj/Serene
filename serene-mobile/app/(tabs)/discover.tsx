@@ -4,6 +4,7 @@ import {
   Text,
   FlatList,
   ActivityIndicator,
+  TouchableOpacity,
   StyleSheet,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
@@ -21,11 +22,24 @@ export default function DiscoverScreen() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
+  function loadDiscover() {
+    setIsLoading(true)
+    setError(null)
     apiFetch<DiscoverResponse>('/api/discover')
-      .then((data) => setPosts(data.posts ?? []))
-      .catch(() => setError('Could not load discoveries.'))
+      .then((data) => {
+        if (__DEV__) console.log('[discover] posts:', data.posts?.length, 'refreshes_at:', data.refreshes_at)
+        setPosts(data.posts ?? [])
+      })
+      .catch((err) => {
+        if (__DEV__) console.log('[discover] error:', err)
+        setError('Could not load discoveries.')
+      })
       .finally(() => setIsLoading(false))
+  }
+
+  useEffect(() => {
+    loadDiscover()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   if (isLoading) {
@@ -68,6 +82,9 @@ export default function DiscoverScreen() {
             <Text style={styles.emptyEmoji}>🧭</Text>
             <Text style={styles.emptyTitle}>Check back tomorrow</Text>
             <Text style={styles.emptyBody}>New discoveries arrive each day.</Text>
+            <TouchableOpacity style={styles.refreshBtn} onPress={loadDiscover}>
+              <Text style={styles.refreshBtnText}>Refresh</Text>
+            </TouchableOpacity>
           </View>
         }
         ListFooterComponent={
@@ -137,5 +154,17 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#D4883A',
     fontSize: 14,
+  },
+  refreshBtn: {
+    marginTop: 20,
+    paddingHorizontal: 28,
+    paddingVertical: 10,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(138,189,128,0.25)',
+  },
+  refreshBtnText: {
+    fontSize: 13,
+    color: '#8ABD80',
   },
 })

@@ -82,7 +82,11 @@ function Avatar({ uri, name, size = 80 }: { uri: string | null; name: string; si
   } as const
 
   if (uri) {
-    return <Image source={{ uri }} style={ring} />
+    return (
+      <View style={[ring, { overflow: 'hidden' }]}>
+        <Image source={{ uri }} style={{ width: size, height: size }} />
+      </View>
+    )
   }
   return (
     <View style={[styles.avatarFallback, ring]}>
