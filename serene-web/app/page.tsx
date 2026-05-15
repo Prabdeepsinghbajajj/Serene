@@ -869,11 +869,11 @@ export default function LandingPage() {
         style={{ padding: "2.5rem 5rem", background: "#1A1A18", borderTop: "1px solid rgba(255,255,255,0.05)" }}>
         <div className="font-display text-grad-sage" style={{ fontSize: "1.3rem" }}>Serene</div>
         <div className="flex gap-8">
-          {["Privacy", "About", "Contact"].map((item) => (
-            <a key={item} href="#" className="font-sans transition-colors" style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.10em" }}
+          {[["Privacy", "/privacy"], ["About", "/about"], ["Contact", "/contact"]].map(([label, href]) => (
+            <a key={label} href={href} className="font-sans transition-colors" style={{ fontSize: "0.68rem", color: "rgba(255,255,255,0.25)", letterSpacing: "0.10em" }}
               onMouseEnter={(e) => { (e.currentTarget as HTMLElement).style.color = "#8ABD80"; }}
               onMouseLeave={(e) => { (e.currentTarget as HTMLElement).style.color = "rgba(255,255,255,0.25)"; }}>
-              {item}
+              {label}
             </a>
           ))}
         </div>
