@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import {
   View,
   Text,
@@ -55,6 +55,17 @@ export default function OnboardingScreen() {
   const [saveError, setSaveError] = useState<string | null>(null)
 
   const fadeAnim = useRef(new Animated.Value(1)).current
+  const dot1W = useRef(new Animated.Value(24)).current
+  const dot2W = useRef(new Animated.Value(8)).current
+  const dot3W = useRef(new Animated.Value(8)).current
+
+  useEffect(() => {
+    Animated.parallel([
+      Animated.spring(dot1W, { toValue: step === 1 ? 24 : 8, useNativeDriver: false }),
+      Animated.spring(dot2W, { toValue: step === 2 ? 24 : 8, useNativeDriver: false }),
+      Animated.spring(dot3W, { toValue: step === 3 ? 24 : 8, useNativeDriver: false }),
+    ]).start()
+  }, [step, dot1W, dot2W, dot3W])
 
   function goToStep(next: 1 | 2 | 3) {
     Animated.timing(fadeAnim, {
@@ -141,15 +152,16 @@ export default function OnboardingScreen() {
     }
   }
 
-  /* ---- Step dots ---- */
+  /* ---- Step dots (animated pill) ---- */
   const dots = (
     <View style={styles.dots}>
-      {[1, 2, 3].map((n) => (
-        <View
-          key={n}
+      {([dot1W, dot2W, dot3W] as Animated.Value[]).map((widthAnim, i) => (
+        <Animated.View
+          key={i}
           style={[
             styles.dot,
-            n === step ? styles.dotActive : styles.dotInactive,
+            { width: widthAnim },
+            (i + 1) === step ? styles.dotActive : styles.dotInactive,
           ]}
         />
       ))}
@@ -353,7 +365,6 @@ const styles = StyleSheet.create({
     marginBottom: 36,
   },
   dot: {
-    width: 8,
     height: 8,
     borderRadius: 4,
   },

@@ -249,7 +249,7 @@ export function PostCard({
   return (
     <article
       ref={cardRef}
-      className="rounded-xl p-4 sm:p-5 space-y-4 transition-all duration-200 hover:scale-[1.002]"
+      className="group rounded-xl p-4 sm:p-5 space-y-4 transition-all duration-200 hover:scale-[1.002]"
       style={{
         background: "rgba(255,255,255,0.03)",
         border: "1px solid rgba(255,255,255,0.07)",
@@ -312,7 +312,7 @@ export function PostCard({
               {relativeTime(post.created_at)}
             </time>
 
-            <div className="flex w-full min-w-0 flex-col items-end sm:w-auto">
+            <div className="flex w-full min-w-0 flex-col items-end sm:w-auto opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-200">
               <PostOptionsMenu
                 postId={post.id}
                 postOwnerId={post.user_id}

@@ -35,6 +35,7 @@ function DailyLimitScreen() {
 function EmptyState() {
   return (
     <View style={styles.fullCenter}>
+      <Text style={styles.emptyEmoji}>🍃</Text>
       <Text style={styles.emptyTitle}>Your feed is quiet</Text>
       <Text style={styles.emptySubtitle}>
         Follow some people to fill your space.
@@ -171,10 +172,12 @@ export default function FeedScreen() {
           <PostCard
             post={item}
             onResonance={handleResonance}
+            onDeleted={() => setPosts((prev) => prev.filter((p) => p.id !== item.id))}
           />
         )}
         contentContainerStyle={styles.listContent}
         showsVerticalScrollIndicator={false}
+        keyboardDismissMode="on-drag"
         refreshControl={
           <RefreshControl
             refreshing={isRefreshing}
@@ -277,6 +280,10 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: 'rgba(245,240,232,0.4)',
     textAlign: 'center',
+  },
+  emptyEmoji: {
+    fontSize: 40,
+    marginBottom: 8,
   },
   emptyTitle: {
     fontSize: 18,

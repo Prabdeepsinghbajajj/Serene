@@ -190,7 +190,7 @@ export function PostOptionsMenu({
         aria-label="Post options"
         aria-expanded={menuOpen}
         onClick={() => setMenuOpen((o) => !o)}
-        className="rounded-lg p-1.5 text-white/35 transition-colors hover:bg-white/[0.06] hover:text-white/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300"
+        className="rounded-lg p-1.5 text-white/60 transition-colors hover:bg-white/10 hover:text-white/80 focus:outline-none focus-visible:ring-2 focus-visible:ring-sage-300"
       >
         <MoreHorizontal size={18} aria-hidden />
       </button>

@@ -1,6 +1,6 @@
 import '../global.css'
-import { useEffect, useState } from 'react'
-import { View, ActivityIndicator } from 'react-native'
+import { useEffect, useRef, useState } from 'react'
+import { View, Animated, StyleSheet } from 'react-native'
 import { Stack, useRouter } from 'expo-router'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 import { supabase } from '@/lib/supabase'
@@ -10,6 +10,18 @@ export default function RootLayout() {
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
   const router = useRouter()
+  const pulseAnim = useRef(new Animated.Value(1)).current
+
+  useEffect(() => {
+    const pulse = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, { toValue: 0.3, duration: 1000, useNativeDriver: true }),
+        Animated.timing(pulseAnim, { toValue: 1, duration: 1000, useNativeDriver: true }),
+      ])
+    )
+    pulse.start()
+    return () => pulse.stop()
+  }, [pulseAnim])
 
   // Phase 1: resolve session, then flip loading off so Stack mounts
   useEffect(() => {
@@ -28,7 +40,6 @@ export default function RootLayout() {
   useEffect(() => {
     if (loading) return
     if (session) {
-      // Check onboarding before sending to tabs
       supabase
         .from('users')
         .select('onboarding_completed')
@@ -44,17 +55,13 @@ export default function RootLayout() {
     }
   }, [loading, session])
 
-  // Loading state: show spinner on dark background (Stack not mounted yet)
   if (loading) {
     return (
       <SafeAreaProvider>
-        <View style={{
-          flex: 1,
-          backgroundColor: '#1A1A18',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}>
-          <ActivityIndicator color="#8ABD80" size="large" />
+        <View style={styles.splash}>
+          <Animated.Text style={[styles.splashText, { opacity: pulseAnim }]}>
+            Serene
+          </Animated.Text>
         </View>
       </SafeAreaProvider>
     )
@@ -69,3 +76,18 @@ export default function RootLayout() {
     </SafeAreaProvider>
   )
 }
+
+const styles = StyleSheet.create({
+  splash: {
+    flex: 1,
+    backgroundColor: '#111410',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  splashText: {
+    fontSize: 48,
+    fontStyle: 'italic',
+    color: '#8ABD80',
+    letterSpacing: 1,
+  },
+})

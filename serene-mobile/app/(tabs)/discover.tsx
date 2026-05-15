@@ -49,7 +49,12 @@ export default function DiscoverScreen() {
       <FlatList
         data={posts}
         keyExtractor={(item) => item.id}
-        renderItem={({ item }) => <PostCard post={item} />}
+        renderItem={({ item }) => (
+          <PostCard
+            post={item}
+            onDeleted={() => setPosts((prev) => prev.filter((p) => p.id !== item.id))}
+          />
+        )}
         contentContainerStyle={styles.list}
         showsVerticalScrollIndicator={false}
         ListHeaderComponent={

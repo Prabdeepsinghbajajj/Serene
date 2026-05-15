@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
 import { PostCard } from "@/components/feed/post-card";
+import { useUser } from "@/context/user-context";
 import type { FeedPost } from "@/types/feed";
 import type { MoodTag } from "@/types/database";
 
@@ -20,6 +21,8 @@ export function PostDetailSheet({
   currentUserId,
   onPostDeleted,
 }: PostDetailSheetProps) {
+  const { profile } = useUser();
+  const resolvedUserId = profile?.id ?? currentUserId ?? '';
   const [post, setPost] = useState<FeedPost | null>(null);
   const [loading, setLoading] = useState(false);
   const [mobile, setMobile] = useState(false);
@@ -97,7 +100,7 @@ export function PostDetailSheet({
               {!loading && post && (
                 <PostCard
                   post={post}
-                  currentUserId={currentUserId}
+                  currentUserId={resolvedUserId}
                   skipWellnessTracking
                   onDeleted={() => {
                     onPostDeleted?.(post.id);

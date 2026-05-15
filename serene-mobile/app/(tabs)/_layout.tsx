@@ -1,16 +1,35 @@
-import { View, StyleSheet } from 'react-native'
+import { View, TouchableOpacity, StyleSheet } from 'react-native'
 import { Tabs } from 'expo-router'
 import { Home, Compass, Plus, User, Leaf } from 'lucide-react-native'
+import * as Haptics from 'expo-haptics'
+import type { BottomTabBarButtonProps } from '@react-navigation/bottom-tabs'
+
+function HapticTab(props: BottomTabBarButtonProps) {
+  return (
+    <TouchableOpacity
+      {...(props as React.ComponentProps<typeof TouchableOpacity>)}
+      activeOpacity={0.8}
+      onPress={(e) => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {})
+        props.onPress?.(e)
+      }}
+    />
+  )
+}
 
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarButton: HapticTab,
         tabBarStyle: {
           backgroundColor: '#1A1A18',
           borderTopColor: 'rgba(255,255,255,0.06)',
           borderTopWidth: 1,
+          height: 84,
+          paddingBottom: 24,
+          paddingTop: 10,
         },
         tabBarActiveTintColor: '#8ABD80',
         tabBarInactiveTintColor: 'rgba(245,240,232,0.3)',
@@ -73,12 +92,17 @@ export default function TabsLayout() {
 
 const styles = StyleSheet.create({
   createIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 46,
+    height: 46,
+    borderRadius: 23,
     backgroundColor: '#4E7A44',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: -6,
+    marginTop: -14,
+    shadowColor: '#4E7A44',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.55,
+    shadowRadius: 12,
+    elevation: 8,
   },
 })

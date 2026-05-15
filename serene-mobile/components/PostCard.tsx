@@ -1,13 +1,19 @@
+import { useEffect, useRef, useState } from 'react'
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
   StyleSheet,
+  Animated,
+  Alert,
 } from 'react-native'
+import * as Haptics from 'expo-haptics'
 import { Leaf, MessageCircle } from 'lucide-react-native'
 import type { FeedPost } from '@/types/feed'
 import { formatRelativeTime, getInitials } from '@/lib/utils'
+import { supabase } from '@/lib/supabase'
+import { apiFetch } from '@/lib/api'
 
 /* -------------------------------------------------------------------------- */
 /*  Mood pill                                                                   */
@@ -34,6 +40,7 @@ const MOOD_TEXT_COLORS: Record<string, string> = {
 function MoodPill({ mood }: { mood: string }) {
   return (
     <View style={[styles.moodPill, { backgroundColor: MOOD_COLORS[mood] ?? 'rgba(255,255,255,0.06)' }]}>
+      <View style={[styles.moodDot, { backgroundColor: MOOD_TEXT_COLORS[mood] ?? 'rgba(245,240,232,0.3)' }]} />
       <Text style={[styles.moodText, { color: MOOD_TEXT_COLORS[mood] ?? 'rgba(245,240,232,0.5)' }]}>
         {mood}
       </Text>
@@ -45,12 +52,16 @@ function MoodPill({ mood }: { mood: string }) {
 /*  Avatar                                                                      */
 /* -------------------------------------------------------------------------- */
 
-function Avatar({ uri, name }: { uri: string | null; name: string }) {
+function Avatar({ uri, name, isRecent }: { uri: string | null; name: string; isRecent: boolean }) {
   if (uri) {
-    return <Image source={{ uri }} style={styles.avatar} />
+    return (
+      <View style={[styles.avatarOuter, isRecent && styles.avatarOuterActive]}>
+        <Image source={{ uri }} style={styles.avatar} />
+      </View>
+    )
   }
   return (
-    <View style={styles.avatarFallback}>
+    <View style={[styles.avatarFallback, isRecent && styles.avatarOuterActive]}>
       <Text style={styles.avatarInitials}>{getInitials(name)}</Text>
     </View>
   )
@@ -64,92 +75,168 @@ interface PostCardProps {
   post: FeedPost
   onResonance?: (postId: string) => void
   onComment?: (postId: string) => void
+  onDeleted?: () => void
 }
 
-export default function PostCard({ post, onResonance, onComment }: PostCardProps) {
+export default function PostCard({ post, onResonance, onComment, onDeleted }: PostCardProps) {
   const { creator, mood_tag, created_at, media_urls, content_type, caption, ai_companion_message, has_resonated } = post
+
+  const mountAnim = useRef(new Animated.Value(0)).current
+  const imageAnim = useRef(new Animated.Value(0)).current
+  const [currentUserId, setCurrentUserId] = useState('')
+
+  useEffect(() => {
+    Animated.timing(mountAnim, {
+      toValue: 1,
+      duration: 280,
+      useNativeDriver: true,
+    }).start()
+  }, [mountAnim])
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setCurrentUserId(session?.user?.id ?? '')
+    })
+  }, [])
 
   const hasMedia = media_urls && media_urls.length > 0
   const isText = content_type === 'text' || content_type === 'slow_post'
+  const isRecent = Date.now() - new Date(created_at).getTime() < 2 * 60 * 60 * 1000
+  const isOwnPost = !!currentUserId && post.user_id === currentUserId
+
+  function handleResonance() {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {})
+    onResonance?.(post.id)
+  }
+
+  async function handleDeletePost() {
+    try {
+      await apiFetch<{ success: boolean }>(`/api/posts/${post.id}`, { method: 'DELETE' })
+      onDeleted?.()
+    } catch {
+      Alert.alert('Error', 'Could not delete post. Please try again.')
+    }
+  }
+
+  function handleLongPress() {
+    if (!isOwnPost) return
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {})
+    Alert.alert(
+      'Post options',
+      '',
+      [
+        {
+          text: 'Delete post',
+          style: 'destructive',
+          onPress: () => void handleDeletePost(),
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]
+    )
+  }
 
   return (
-    <View style={styles.card}>
-      {/* ── Header ── */}
-      <View style={styles.header}>
-        <Avatar uri={creator.avatar_url} name={creator.display_name} />
+    <Animated.View
+      style={{
+        opacity: mountAnim,
+        transform: [{
+          translateY: mountAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [10, 0],
+          }),
+        }],
+      }}
+    >
+      <TouchableOpacity activeOpacity={1} onLongPress={handleLongPress} delayLongPress={500}>
+      <View style={styles.card}>
+        {/* ── Header ── */}
+        <View style={styles.header}>
+          <Avatar uri={creator.avatar_url} name={creator.display_name} isRecent={isRecent} />
 
-        <View style={styles.headerMeta}>
-          <Text style={styles.displayName} numberOfLines={1}>
-            {creator.display_name}
-          </Text>
-          {mood_tag && <MoodPill mood={mood_tag} />}
+          <View style={styles.headerMeta}>
+            <Text style={styles.displayName} numberOfLines={1}>
+              {creator.display_name}
+            </Text>
+            {mood_tag && <MoodPill mood={mood_tag} />}
+          </View>
+
+          <Text style={styles.timestamp}>{formatRelativeTime(created_at)}</Text>
         </View>
 
-        <Text style={styles.timestamp}>{formatRelativeTime(created_at)}</Text>
-      </View>
-
-      {/* ── Media ── */}
-      {hasMedia && (
-        <Image
-          source={{ uri: media_urls[0] }}
-          style={styles.media}
-          resizeMode="cover"
-          accessibilityLabel="Post image"
-        />
-      )}
-
-      {/* ── Text content (text / slow_post) ── */}
-      {isText && caption && (
-        <View style={styles.textContent}>
-          <Text style={styles.textContentBody}>{caption}</Text>
-        </View>
-      )}
-
-      {/* ── Caption (for media posts) ── */}
-      {!isText && caption && (
-        <Text style={styles.caption}>{caption}</Text>
-      )}
-
-      {/* ── Companion note ── */}
-      {ai_companion_message && (
-        <View style={styles.companionNote}>
-          <Text style={styles.companionLabel}>✦ A NOTE FROM YOUR COMPANION</Text>
-          <Text style={styles.companionMessage}>{ai_companion_message}</Text>
-        </View>
-      )}
-
-      {/* ── Actions ── */}
-      <View style={styles.actions}>
-        <TouchableOpacity
-          style={styles.actionBtn}
-          onPress={() => onResonance?.(post.id)}
-          activeOpacity={0.7}
-          accessibilityLabel={has_resonated ? 'Remove resonance' : 'Resonate with post'}
-          accessibilityRole="button"
-        >
-          <Leaf
-            size={20}
-            color={has_resonated ? '#8ABD80' : 'rgba(245,240,232,0.3)'}
-            fill={has_resonated ? 'rgba(138,189,128,0.3)' : 'transparent'}
-            strokeWidth={1.8}
+        {/* ── Media ── */}
+        {hasMedia && (
+          <Animated.Image
+            source={{ uri: media_urls[0] }}
+            style={[styles.media, { opacity: imageAnim }]}
+            resizeMode="cover"
+            accessibilityLabel="Post image"
+            onLoad={() =>
+              Animated.timing(imageAnim, {
+                toValue: 1,
+                duration: 300,
+                useNativeDriver: true,
+              }).start()
+            }
           />
-        </TouchableOpacity>
+        )}
 
-        <TouchableOpacity
-          style={styles.actionBtn}
-          onPress={() => onComment?.(post.id)}
-          activeOpacity={0.7}
-          accessibilityLabel="Comment on post"
-          accessibilityRole="button"
-        >
-          <MessageCircle
-            size={20}
-            color="rgba(245,240,232,0.3)"
-            strokeWidth={1.8}
-          />
-        </TouchableOpacity>
+        {/* ── Text content (text / slow_post) ── */}
+        {isText && caption && (
+          <View style={styles.textContent}>
+            <Text style={styles.textContentBody}>{caption}</Text>
+          </View>
+        )}
+
+        {/* ── Caption (for media posts) ── */}
+        {!isText && caption && (
+          <Text style={styles.caption}>{caption}</Text>
+        )}
+
+        {/* ── Companion note ── */}
+        {ai_companion_message && (
+          <View style={styles.companionNote}>
+            <Text style={styles.companionLabel}>✦ A NOTE FROM YOUR COMPANION</Text>
+            <Text style={styles.companionMessage}>{ai_companion_message}</Text>
+          </View>
+        )}
+
+        {/* ── Actions ── */}
+        <View style={styles.actions}>
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={handleResonance}
+            activeOpacity={0.7}
+            accessibilityLabel={has_resonated ? 'Remove resonance' : 'Resonate with post'}
+            accessibilityRole="button"
+          >
+            <Leaf
+              size={20}
+              color={has_resonated ? '#8ABD80' : 'rgba(245,240,232,0.3)'}
+              fill={has_resonated ? 'rgba(138,189,128,0.3)' : 'transparent'}
+              strokeWidth={1.8}
+            />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionBtn}
+            onPress={() => onComment?.(post.id)}
+            activeOpacity={0.7}
+            accessibilityLabel="Comment on post"
+            accessibilityRole="button"
+          >
+            <MessageCircle
+              size={20}
+              color="rgba(245,240,232,0.3)"
+              strokeWidth={1.8}
+            />
+          </TouchableOpacity>
+        </View>
       </View>
-    </View>
+      </TouchableOpacity>
+    </Animated.View>
   )
 }
 
@@ -171,18 +258,31 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     gap: 10,
   },
+  avatarOuter: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1.5,
+    borderColor: 'transparent',
+    overflow: 'hidden',
+  },
+  avatarOuterActive: {
+    borderColor: 'rgba(138,189,128,0.55)',
+  },
   avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
   },
   avatarFallback: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
+    width: 34,
+    height: 34,
+    borderRadius: 17,
     backgroundColor: 'rgba(78,122,68,0.3)',
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: 'transparent',
   },
   avatarInitials: {
     fontSize: 11,
@@ -211,6 +311,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     paddingHorizontal: 7,
     paddingVertical: 2,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  moodDot: {
+    width: 5,
+    height: 5,
+    borderRadius: 2.5,
+    marginRight: 4,
   },
   moodText: {
     fontSize: 9,
@@ -283,6 +391,5 @@ const styles = StyleSheet.create({
   actionBtn: {
     paddingVertical: 12,
     paddingHorizontal: 18,
-    // min 44px touch target
   },
 })

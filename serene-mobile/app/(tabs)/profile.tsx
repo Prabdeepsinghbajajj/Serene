@@ -7,13 +7,15 @@ import {
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
+  Alert,
   Dimensions,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useRouter } from 'expo-router'
 import { Lock, Settings } from 'lucide-react-native'
 import { apiFetch } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
-import { getInitials, formatRelativeTime } from '@/lib/utils'
+import { getInitials } from '@/lib/utils'
 
 const CELL_SIZE = Math.floor(Dimensions.get('window').width / 3)
 
@@ -71,21 +73,19 @@ const MOOD_EMOJI: Record<string, string> = {
 /* -------------------------------------------------------------------------- */
 
 function Avatar({ uri, name, size = 80 }: { uri: string | null; name: string; size?: number }) {
+  const ring = {
+    width: size,
+    height: size,
+    borderRadius: size / 2,
+    borderWidth: 2,
+    borderColor: 'rgba(138,189,128,0.3)',
+  } as const
+
   if (uri) {
-    return (
-      <Image
-        source={{ uri }}
-        style={{ width: size, height: size, borderRadius: size / 2 }}
-      />
-    )
+    return <Image source={{ uri }} style={ring} />
   }
   return (
-    <View
-      style={[
-        styles.avatarFallback,
-        { width: size, height: size, borderRadius: size / 2 },
-      ]}
-    >
+    <View style={[styles.avatarFallback, ring]}>
       <Text style={[styles.avatarInitials, { fontSize: size * 0.28 }]}>
         {getInitials(name)}
       </Text>
@@ -139,16 +139,14 @@ function ProfileHeader({
 
   return (
     <View style={styles.headerSection}>
-      {/* Avatar + display name */}
-      <View style={styles.avatarRow}>
+      {/* Avatar centered above name */}
+      <View style={styles.avatarBlock}>
         <Avatar uri={profile.avatar_url} name={profile.display_name} size={80} />
-        <View style={styles.avatarMeta}>
-          <Text style={styles.displayName}>{profile.display_name}</Text>
-          <Text style={styles.username}>@{profile.username}</Text>
-          {profile.personality_type && (
-            <Text style={styles.personalityType}>{profile.personality_type}</Text>
-          )}
-        </View>
+        <Text style={styles.displayName}>{profile.display_name}</Text>
+        <Text style={styles.username}>@{profile.username}</Text>
+        {profile.personality_type && (
+          <Text style={styles.personalityType}>{profile.personality_type}</Text>
+        )}
       </View>
 
       {/* Bio */}
@@ -188,11 +186,33 @@ function ProfileHeader({
 /* -------------------------------------------------------------------------- */
 
 export default function ProfileScreen() {
+  const router = useRouter()
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [posts, setPosts] = useState<ProfilePost[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [postsLoading, setPostsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  function handleSettingsPress() {
+    Alert.alert(
+      'Account',
+      '',
+      [
+        {
+          text: 'Sign out',
+          style: 'destructive',
+          onPress: async () => {
+            await supabase.auth.signOut()
+            router.replace('/(auth)/login')
+          },
+        },
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+      ]
+    )
+  }
 
   const fetchProfile = useCallback(async () => {
     setIsLoading(true)
@@ -255,11 +275,14 @@ export default function ProfileScreen() {
 
   return (
     <SafeAreaView style={styles.root} edges={['top']}>
-      {/* Top bar */}
+      {/* Top bar — settings gear only, no title */}
       <View style={styles.topBar}>
-        <Text style={styles.topBarTitle}>Profile</Text>
-        <TouchableOpacity hitSlop={12}>
-          <Settings size={20} color="rgba(245,240,232,0.3)" strokeWidth={1.5} />
+        <TouchableOpacity
+          style={styles.settingsBtn}
+          hitSlop={12}
+          onPress={handleSettingsPress}
+        >
+          <Settings size={20} color="rgba(245,240,232,0.35)" strokeWidth={1.5} />
         </TouchableOpacity>
       </View>
 
@@ -277,6 +300,7 @@ export default function ProfileScreen() {
         ListEmptyComponent={
           !postsLoading ? (
             <View style={styles.emptyPosts}>
+              <Text style={styles.emptyPostsEmoji}>🍃</Text>
               <Text style={styles.emptyPostsText}>No posts yet</Text>
             </View>
           ) : null
@@ -297,17 +321,14 @@ const styles = StyleSheet.create({
   },
   topBar: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     paddingHorizontal: 20,
-    paddingVertical: 14,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(255,255,255,0.05)',
   },
-  topBarTitle: {
-    fontSize: 17,
-    fontWeight: '500',
-    color: '#F5F0E8',
+  settingsBtn: {
+    padding: 4,
   },
   listContent: {
     paddingBottom: 40,
@@ -320,12 +341,12 @@ const styles = StyleSheet.create({
   headerSection: {
     padding: 20,
     paddingBottom: 0,
-    gap: 12,
-  },
-  avatarRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: 16,
+  },
+  avatarBlock: {
+    alignItems: 'center',
+    gap: 6,
+    paddingVertical: 8,
   },
   avatarFallback: {
     backgroundColor: 'rgba(78,122,68,0.3)',
@@ -336,14 +357,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#8ABD80',
   },
-  avatarMeta: {
-    flex: 1,
-    gap: 3,
-  },
   displayName: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '500',
     color: '#F5F0E8',
+    marginTop: 4,
   },
   username: {
     fontSize: 13,
@@ -354,17 +372,18 @@ const styles = StyleSheet.create({
     color: 'rgba(138,189,128,0.55)',
     textTransform: 'capitalize',
     letterSpacing: 0.4,
-    marginTop: 2,
   },
   bio: {
     fontSize: 14,
     color: 'rgba(245,240,232,0.5)',
     lineHeight: 21,
     fontWeight: '300',
+    textAlign: 'center',
   },
   statsRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
   },
   statItem: {
@@ -384,7 +403,7 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     backgroundColor: 'rgba(255,255,255,0.05)',
-    marginTop: 8,
+    marginTop: 4,
     marginBottom: 2,
     marginHorizontal: -20,
   },
@@ -398,6 +417,7 @@ const styles = StyleSheet.create({
     borderColor: '#1A1A18',
   },
   gridCellText: {
+    backgroundColor: 'rgba(78,122,68,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 8,
@@ -408,7 +428,7 @@ const styles = StyleSheet.create({
   },
   gridCellCaption: {
     fontSize: 9,
-    color: 'rgba(245,240,232,0.35)',
+    color: 'rgba(245,240,232,0.45)',
     textAlign: 'center',
     lineHeight: 13,
   },
@@ -417,6 +437,10 @@ const styles = StyleSheet.create({
   emptyPosts: {
     paddingVertical: 40,
     alignItems: 'center',
+    gap: 8,
+  },
+  emptyPostsEmoji: {
+    fontSize: 32,
   },
   emptyPostsText: {
     fontSize: 14,

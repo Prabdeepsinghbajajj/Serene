@@ -15,7 +15,7 @@ import { useRouter } from 'expo-router'
 import { supabase } from '@/lib/supabase'
 
 /* -------------------------------------------------------------------------- */
-/*  Username availability hook                                                  */
+/*  Username availability (public API check)                                   */
 /* -------------------------------------------------------------------------- */
 
 type UsernameStatus = 'idle' | 'checking' | 'available' | 'taken' | 'invalid'
@@ -26,12 +26,12 @@ function useUsernameCheck(username: string): UsernameStatus {
   const check = useCallback(async (value: string) => {
     if (!/^[a-z][a-z0-9_]{2,19}$/.test(value)) { setStatus('invalid'); return }
     setStatus('checking')
-    const { data } = await supabase
-      .from('users')
-      .select('id')
-      .eq('username', value)
-      .maybeSingle()
-    setStatus(data ? 'taken' : 'available')
+    try {
+      const res = await fetch(`https://www.serene.network/api/profile/${value}`)
+      setStatus(res.ok ? 'taken' : res.status === 404 ? 'available' : 'idle')
+    } catch {
+      setStatus('idle')
+    }
   }, [])
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export default function SignupScreen() {
     setLoading(true)
     setServerError(null)
 
-    // Final username uniqueness check before writing
+    // Final race-condition guard via Supabase
     const { data: existing } = await supabase
       .from('users')
       .select('id')
@@ -123,218 +123,255 @@ export default function SignupScreen() {
     setConfirmed(true)
   }
 
-  /* Email confirmation screen */
   if (confirmed) {
     return (
-      <SafeAreaView style={styles.root}>
-        <View style={styles.confirmedContainer}>
+      <View style={styles.root}>
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <View style={styles.blob1} />
+          <View style={styles.blob2} />
+        </View>
+        <SafeAreaView style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 24 }}>
           <View style={styles.confirmedCard}>
             <Text style={styles.confirmedTitle}>Check your email</Text>
             <Text style={styles.confirmedBody}>
               We sent you a confirmation link. Click it to activate your account and start your journey on Serene.
             </Text>
           </View>
-        </View>
-      </SafeAreaView>
+        </SafeAreaView>
+      </View>
     )
   }
 
   return (
-    <SafeAreaView style={styles.root}>
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scroll}
-          keyboardShouldPersistTaps="handled"
+    <View style={styles.root}>
+      {/* ── Mesh gradient blobs ── */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="none">
+        <View style={styles.blob1} />
+        <View style={styles.blob2} />
+        <View style={styles.blob3} />
+      </View>
+
+      <SafeAreaView style={{ flex: 1 }}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-          <Text style={styles.logo}>Serene</Text>
+          <ScrollView
+            contentContainerStyle={styles.scroll}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <Text style={styles.wordmark}>Serene</Text>
 
-          <View style={styles.card}>
-            <View style={styles.cardHeader}>
-              <Text style={styles.cardTitle}>Join Serene</Text>
-              <Text style={styles.cardSubtitle}>Share what matters. Rest when you need to.</Text>
-            </View>
+            <View style={styles.card}>
+              <View style={styles.cardHeader}>
+                <Text style={styles.cardTitle}>Join Serene</Text>
+                <Text style={styles.cardSubtitle}>Share what matters. Rest when you need to.</Text>
+              </View>
 
-            {/* Display name */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>DISPLAY NAME</Text>
-              <TextInput
-                style={styles.input}
-                value={displayName}
-                onChangeText={setDisplayName}
-                placeholder="How you'll appear to others"
-                placeholderTextColor="rgba(245,240,232,0.3)"
-                autoComplete="name"
-                returnKeyType="next"
-              />
-            </View>
+              {/* Display name */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>DISPLAY NAME</Text>
+                <TextInput
+                  style={styles.input}
+                  value={displayName}
+                  onChangeText={setDisplayName}
+                  placeholder="How you'll appear to others"
+                  placeholderTextColor="rgba(245,240,232,0.22)"
+                  keyboardAppearance="dark"
+                  autoComplete="name"
+                  returnKeyType="next"
+                />
+              </View>
 
-            {/* Username */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>USERNAME</Text>
-              <TextInput
-                style={[
-                  styles.input,
-                  usernameStatus === 'taken' && styles.inputError,
-                  usernameStatus === 'available' && styles.inputSuccess,
-                ]}
-                value={username}
-                onChangeText={(v) => setUsername(v.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
-                placeholder="lowercase_only"
-                placeholderTextColor="rgba(245,240,232,0.3)"
-                autoCapitalize="none"
-                autoCorrect={false}
-                autoComplete="username"
-                returnKeyType="next"
-              />
-              {usernameStatus === 'checking' && (
-                <Text style={styles.hintNeutral}>Checking availability…</Text>
-              )}
-              {usernameStatus === 'available' && (
-                <Text style={styles.hintGood}>Username is available ✓</Text>
-              )}
-              {usernameStatus === 'taken' && (
-                <Text style={styles.hintError}>This username is taken.</Text>
-              )}
-              {usernameStatus === 'invalid' && username.length >= 3 && (
-                <Text style={styles.hintError}>
-                  Lowercase letters, numbers and _ only (3–20 chars).
-                </Text>
-              )}
-            </View>
+              {/* Username */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>USERNAME</Text>
+                <TextInput
+                  style={[
+                    styles.input,
+                    usernameStatus === 'taken' && styles.inputError,
+                    usernameStatus === 'available' && styles.inputSuccess,
+                  ]}
+                  value={username}
+                  onChangeText={(v) => setUsername(v.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+                  placeholder="lowercase_only"
+                  placeholderTextColor="rgba(245,240,232,0.22)"
+                  keyboardAppearance="dark"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="username"
+                  returnKeyType="next"
+                />
+                {usernameStatus === 'checking' && (
+                  <Text style={styles.hintNeutral}>Checking availability…</Text>
+                )}
+                {usernameStatus === 'available' && (
+                  <Text style={styles.hintGood}>Username is available ✓</Text>
+                )}
+                {usernameStatus === 'taken' && (
+                  <Text style={styles.hintError}>This username is taken.</Text>
+                )}
+                {usernameStatus === 'invalid' && username.length >= 3 && (
+                  <Text style={styles.hintError}>
+                    Lowercase letters, numbers and _ only (3–20 chars).
+                  </Text>
+                )}
+              </View>
 
-            {/* Email */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>EMAIL</Text>
-              <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                placeholder="you@example.com"
-                placeholderTextColor="rgba(245,240,232,0.3)"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                returnKeyType="next"
-              />
-            </View>
+              {/* Email */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>EMAIL</Text>
+                <TextInput
+                  style={styles.input}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="you@example.com"
+                  placeholderTextColor="rgba(245,240,232,0.22)"
+                  keyboardType="email-address"
+                  keyboardAppearance="dark"
+                  autoCapitalize="none"
+                  autoComplete="email"
+                  returnKeyType="next"
+                />
+              </View>
 
-            {/* Password + strength bars */}
-            <View style={styles.fieldGroup}>
-              <Text style={styles.label}>PASSWORD</Text>
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                placeholder="Min 8 chars, 1 uppercase, 1 number"
-                placeholderTextColor="rgba(245,240,232,0.3)"
-                secureTextEntry
-                autoComplete="new-password"
-                returnKeyType="done"
-                onSubmitEditing={handleSignUp}
-              />
-              {password.length > 0 && strength > 0 && (
-                <View style={styles.strengthRow}>
-                  {STRENGTH_COLORS[strength as 1 | 2 | 3].map((color, i) => (
-                    <View
-                      key={i}
-                      style={[styles.strengthBar, { backgroundColor: color }]}
-                    />
-                  ))}
-                </View>
-              )}
-            </View>
+              {/* Password + strength */}
+              <View style={styles.fieldGroup}>
+                <Text style={styles.label}>PASSWORD</Text>
+                <TextInput
+                  style={styles.input}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Min 8 chars, 1 uppercase, 1 number"
+                  placeholderTextColor="rgba(245,240,232,0.22)"
+                  secureTextEntry
+                  keyboardAppearance="dark"
+                  autoComplete="new-password"
+                  returnKeyType="done"
+                  onSubmitEditing={handleSignUp}
+                />
+                {password.length > 0 && strength > 0 && (
+                  <View style={styles.strengthRow}>
+                    {STRENGTH_COLORS[strength as 1 | 2 | 3].map((color, i) => (
+                      <View
+                        key={i}
+                        style={[styles.strengthBar, { backgroundColor: color }]}
+                      />
+                    ))}
+                  </View>
+                )}
+              </View>
 
-            {serverError && <Text style={styles.error}>{serverError}</Text>}
+              {serverError && <Text style={styles.error}>{serverError}</Text>}
 
-            <TouchableOpacity
-              style={[styles.primaryBtn, !canSubmit && styles.btnDisabled]}
-              onPress={handleSignUp}
-              disabled={!canSubmit}
-              activeOpacity={0.85}
-            >
-              {loading
-                ? <ActivityIndicator color="#F5F0E8" size="small" />
-                : <Text style={styles.primaryBtnText}>CREATE ACCOUNT</Text>
-              }
-            </TouchableOpacity>
-
-            <View style={styles.footer}>
-              <Text style={styles.footerText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
-                <Text style={styles.footerLink}>Sign in</Text>
+              <TouchableOpacity
+                style={[styles.primaryBtn, !canSubmit && styles.btnDisabled]}
+                onPress={handleSignUp}
+                disabled={!canSubmit}
+                activeOpacity={0.85}
+              >
+                {loading
+                  ? <ActivityIndicator color="#F5F0E8" size="small" />
+                  : <Text style={styles.primaryBtnText}>CREATE ACCOUNT</Text>
+                }
               </TouchableOpacity>
+
+              <View style={styles.footer}>
+                <Text style={styles.footerText}>Already have an account? </Text>
+                <TouchableOpacity onPress={() => router.replace('/(auth)/login')}>
+                  <Text style={styles.footerLink}>Sign in</Text>
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#1A1A18' },
+  root: {
+    flex: 1,
+    backgroundColor: '#111410',
+  },
+  blob1: {
+    position: 'absolute',
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(78,122,68,0.12)',
+    top: -70,
+    left: -80,
+  },
+  blob2: {
+    position: 'absolute',
+    width: 260,
+    height: 260,
+    borderRadius: 130,
+    backgroundColor: 'rgba(74,138,181,0.07)',
+    bottom: 60,
+    right: -70,
+  },
+  blob3: {
+    position: 'absolute',
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    backgroundColor: 'rgba(47,80,39,0.09)',
+    top: 340,
+    right: -40,
+  },
   scroll: {
     flexGrow: 1,
-    justifyContent: 'center',
+    alignItems: 'center',
     paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingTop: 56,
+    paddingBottom: 40,
   },
-  confirmedContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
-  },
-  confirmedCard: {
-    backgroundColor: 'rgba(78,122,68,0.12)',
-    borderRadius: 20,
-    padding: 28,
-    borderWidth: 1,
-    borderColor: 'rgba(78,122,68,0.2)',
-    gap: 12,
-  },
-  confirmedTitle: {
-    fontSize: 22,
-    color: '#F5F0E8',
-    fontWeight: '300',
-  },
-  confirmedBody: {
-    fontSize: 15,
-    color: 'rgba(245,240,232,0.6)',
-    lineHeight: 24,
-  },
-  logo: {
-    textAlign: 'center',
-    fontSize: 36,
+  wordmark: {
+    fontSize: 44,
+    fontStyle: 'italic',
     color: '#8ABD80',
-    marginBottom: 32,
+    textAlign: 'center',
+    marginBottom: 36,
   },
   card: {
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 20,
-    padding: 28,
+    width: '100%',
+    maxWidth: 400,
+    backgroundColor: 'rgba(16,20,14,0.90)',
+    borderRadius: 24,
+    padding: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    gap: 20,
+    borderColor: 'rgba(255,255,255,0.09)',
+    gap: 18,
   },
   cardHeader: { gap: 4 },
-  cardTitle: { fontSize: 26, color: '#F5F0E8', fontWeight: '300' },
-  cardSubtitle: { fontSize: 14, color: 'rgba(245,240,232,0.4)' },
+  cardTitle: {
+    fontSize: 22,
+    color: 'rgba(245,240,232,0.85)',
+    fontWeight: '300',
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    color: 'rgba(245,240,232,0.35)',
+  },
   fieldGroup: { gap: 6 },
   label: {
-    fontSize: 11,
-    letterSpacing: 1.2,
-    color: 'rgba(245,240,232,0.5)',
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 2,
+    color: 'rgba(245,240,232,0.32)',
+    textTransform: 'uppercase',
   },
   input: {
     backgroundColor: 'rgba(255,255,255,0.06)',
-    borderRadius: 16,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 16,
     color: '#F5F0E8',
-    fontSize: 16,
+    fontSize: 15,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
   },
@@ -351,28 +388,33 @@ const styles = StyleSheet.create({
   },
   strengthBar: {
     flex: 1,
-    height: 4,
+    height: 3,
     borderRadius: 2,
   },
   hintNeutral: { fontSize: 12, color: 'rgba(245,240,232,0.4)' },
   hintGood: { fontSize: 12, color: '#8ABD80' },
   hintError: { fontSize: 12, color: '#D4883A' },
   error: {
-    fontSize: 14,
+    fontSize: 13,
     color: '#D4883A',
     textAlign: 'center',
   },
   primaryBtn: {
     backgroundColor: '#4E7A44',
-    borderRadius: 32,
+    borderRadius: 100,
     paddingVertical: 16,
     alignItems: 'center',
+    shadowColor: '#4E7A44',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.45,
+    shadowRadius: 16,
+    elevation: 8,
   },
   primaryBtnText: {
-    color: '#F5F0E8',
-    fontSize: 15,
+    color: '#fff',
+    fontSize: 12,
     fontWeight: '700',
-    letterSpacing: 1,
+    letterSpacing: 2.5,
   },
   btnDisabled: { opacity: 0.45 },
   footer: {
@@ -380,6 +422,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  footerText: { fontSize: 14, color: 'rgba(245,240,232,0.4)' },
-  footerLink: { fontSize: 14, color: '#8ABD80' },
+  footerText: { fontSize: 13, color: 'rgba(245,240,232,0.35)' },
+  footerLink: { fontSize: 13, color: '#8ABD80' },
+  confirmedCard: {
+    backgroundColor: 'rgba(78,122,68,0.12)',
+    borderRadius: 24,
+    padding: 28,
+    borderWidth: 1,
+    borderColor: 'rgba(78,122,68,0.2)',
+    gap: 12,
+  },
+  confirmedTitle: {
+    fontSize: 22,
+    color: '#F5F0E8',
+    fontWeight: '300',
+  },
+  confirmedBody: {
+    fontSize: 15,
+    color: 'rgba(245,240,232,0.6)',
+    lineHeight: 24,
+  },
 })
