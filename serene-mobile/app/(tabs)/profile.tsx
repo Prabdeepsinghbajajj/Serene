@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
 } from 'react-native'
 import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { useRouter } from 'expo-router'
+import { useRouter, useFocusEffect } from 'expo-router'
 import { Lock, Settings } from 'lucide-react-native'
 import * as Haptics from 'expo-haptics'
 import { apiFetch } from '@/lib/api'
@@ -165,7 +165,7 @@ function ProfileHeader({
     <View style={styles.headerSection}>
       {/* Avatar centered above name */}
       <View style={styles.avatarBlock}>
-        <Avatar uri={profile.avatar_url} name={profile.display_name} size={80} />
+        <Avatar key={profile.avatar_url ?? 'no-avatar'} uri={profile.avatar_url} name={profile.display_name} size={80} />
         <Text style={styles.displayName}>{profile.display_name}</Text>
         <Text style={styles.username}>@{profile.username}</Text>
         {profile.personality_type && (
@@ -299,9 +299,11 @@ export default function ProfileScreen() {
     }
   }, [])
 
-  useEffect(() => {
-    fetchProfile()
-  }, [fetchProfile])
+  useFocusEffect(
+    useCallback(() => {
+      fetchProfile()
+    }, [fetchProfile])
+  )
 
   if (isLoading) {
     return (

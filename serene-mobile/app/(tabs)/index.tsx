@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   StyleSheet,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useFocusEffect } from 'expo-router'
 import PostCard from '@/components/PostCard'
 import { apiFetch } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
@@ -79,11 +80,13 @@ export default function FeedScreen() {
     }
   }, [])
 
-  /* Initial load */
-  useEffect(() => {
-    setIsLoading(true)
-    fetchFeed(1, true).finally(() => setIsLoading(false))
-  }, [fetchFeed])
+  /* Refresh on focus (covers initial mount + returning to tab after posting) */
+  useFocusEffect(
+    useCallback(() => {
+      setIsLoading(true)
+      fetchFeed(1, true).finally(() => setIsLoading(false))
+    }, [fetchFeed])
+  )
 
   /* Pull to refresh */
   const handleRefresh = useCallback(async () => {

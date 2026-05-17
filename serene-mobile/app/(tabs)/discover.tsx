@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import { useFocusEffect } from 'expo-router'
 import PostCard from '@/components/PostCard'
 import { apiFetch } from '@/lib/api'
 import type { FeedPost } from '@/types/feed'
@@ -22,7 +23,7 @@ export default function DiscoverScreen() {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  function loadDiscover() {
+  const loadDiscover = useCallback(() => {
     setIsLoading(true)
     setError(null)
     apiFetch<DiscoverResponse>('/api/discover')
@@ -35,12 +36,13 @@ export default function DiscoverScreen() {
         setError('Could not load discoveries.')
       })
       .finally(() => setIsLoading(false))
-  }
-
-  useEffect(() => {
-    loadDiscover()
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
+
+  useFocusEffect(
+    useCallback(() => {
+      loadDiscover()
+    }, [loadDiscover])
+  )
 
   if (isLoading) {
     return (
