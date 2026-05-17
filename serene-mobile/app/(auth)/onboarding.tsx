@@ -111,20 +111,27 @@ export default function OnboardingScreen() {
       let avatarUrl: string | null = null
 
       if (!skipAvatar && avatarUri) {
-        const ext = avatarUri.split('.').pop()?.split('?')[0] ?? 'jpg'
+        const ext = avatarUri.split('.').pop()?.toLowerCase().split('?')[0] ?? 'jpg'
+        const mimeType = (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : `image/${ext}`
         const path = `${user.id}/avatar.${ext}`
 
-        // Fetch the local file as a blob and upload
-        const response = await fetch(avatarUri)
-        const blob = await response.blob()
+        const { data: { session } } = await supabase.auth.getSession()
+        const formData = new FormData()
+        formData.append('file', { uri: avatarUri, name: `avatar.${ext}`, type: mimeType } as unknown as Blob)
 
-        const { error: uploadError } = await supabase.storage
-          .from('avatars')
-          .upload(path, blob, { upsert: true, contentType: blob.type || 'image/jpeg' })
-        if (uploadError) throw uploadError
-
-        const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(path)
-        avatarUrl = urlData.publicUrl
+        const uploadResponse = await fetch(
+          `https://fjfdundcziicyxbrsvgs.supabase.co/storage/v1/object/avatars/${path}`,
+          {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${session?.access_token}`, 'x-upsert': 'true' },
+            body: formData,
+          }
+        )
+        if (!uploadResponse.ok) {
+          const err = await uploadResponse.text()
+          throw new Error(`Avatar upload failed: ${err}`)
+        }
+        avatarUrl = `https://fjfdundcziicyxbrsvgs.supabase.co/storage/v1/object/public/avatars/${path}`
       }
 
       const { error: userError } = await supabase

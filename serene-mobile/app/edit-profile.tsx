@@ -50,20 +50,34 @@ export default function EditProfileScreen() {
       aspect: [1, 1],
       quality: 0.8,
     })
-    if (result.canceled) return
+    if (result.canceled || !result.assets[0]) return
+
     const uri = result.assets[0].uri
-    const ext = uri.split('.').pop() ?? 'jpg'
+    const ext = uri.split('.').pop()?.toLowerCase() ?? 'jpg'
+    const mimeType = (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : `image/${ext}`
     const filePath = `${userId}/avatar.${ext}`
-    const response = await fetch(uri)
-    const blob = await response.blob()
-    const { error } = await supabase.storage
-      .from('avatars')
-      .upload(filePath, blob, { contentType: `image/${ext}`, upsert: true })
-    if (!error) {
-      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath)
-      setAvatarUrl(data.publicUrl)
+
+    const { data: { session } } = await supabase.auth.getSession()
+
+    const formData = new FormData()
+    formData.append('file', { uri, name: `avatar.${ext}`, type: mimeType } as unknown as Blob)
+
+    const response = await fetch(
+      `https://fjfdundcziicyxbrsvgs.supabase.co/storage/v1/object/avatars/${filePath}`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session?.access_token}`, 'x-upsert': 'true' },
+        body: formData,
+      }
+    )
+    if (response.ok) {
+      setAvatarUrl(
+        `https://fjfdundcziicyxbrsvgs.supabase.co/storage/v1/object/public/avatars/${filePath}`
+      )
     } else {
-      Alert.alert('Error', 'Could not upload photo.')
+      const err = await response.text()
+      console.error('Avatar upload error:', err)
+      Alert.alert('Error', 'Could not upload photo. Try again.')
     }
   }
 

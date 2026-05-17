@@ -155,27 +155,34 @@ export default function LoginScreen() {
                 }
               </TouchableOpacity>
 
-              <View style={styles.divider}>
-                <View style={styles.dividerLine} />
-                <Text style={styles.dividerText}>or</Text>
-                <View style={styles.dividerLine} />
-              </View>
-
-              <TouchableOpacity
-                style={[styles.googleBtn, googleLoading && styles.btnDisabled]}
-                onPress={handleGoogleSignIn}
-                disabled={googleLoading}
-                activeOpacity={0.85}
-              >
-                {googleLoading ? (
-                  <ActivityIndicator color="rgba(245,240,232,0.7)" size="small" />
-                ) : (
-                  <View style={styles.googleRow}>
-                    <GoogleIcon />
-                    <Text style={styles.googleBtnText}>Continue with Google</Text>
+              {!__DEV__ ? (
+                <>
+                  <View style={styles.divider}>
+                    <View style={styles.dividerLine} />
+                    <Text style={styles.dividerText}>or</Text>
+                    <View style={styles.dividerLine} />
                   </View>
-                )}
-              </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.googleBtn, googleLoading && styles.btnDisabled]}
+                    onPress={handleGoogleSignIn}
+                    disabled={googleLoading}
+                    activeOpacity={0.85}
+                  >
+                    {googleLoading ? (
+                      <ActivityIndicator color="rgba(245,240,232,0.7)" size="small" />
+                    ) : (
+                      <View style={styles.googleRow}>
+                        <GoogleIcon />
+                        <Text style={styles.googleBtnText}>Continue with Google</Text>
+                      </View>
+                    )}
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <Text style={styles.devNote}>
+                  Google sign-in available in the full app
+                </Text>
+              )}
 
               <View style={styles.footer}>
                 <Text style={styles.footerText}>New to Serene? </Text>
@@ -340,6 +347,12 @@ const styles = StyleSheet.create({
   googleBtnText: {
     color: 'rgba(245,240,232,0.65)',
     fontSize: 14,
+  },
+  devNote: {
+    color: 'rgba(245,240,232,0.25)',
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 4,
   },
   footer: {
     flexDirection: 'row',

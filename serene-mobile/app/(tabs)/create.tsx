@@ -101,17 +101,30 @@ export default function CreateScreen() {
   }, [])
 
   const uploadMedia = useCallback(async (uri: string): Promise<string> => {
-    const { data: { user } } = await supabase.auth.getUser()
-    const response = await fetch(uri)
-    const blob = await response.blob()
-    const ext = uri.split('.').pop()?.split('?')[0] ?? 'jpg'
-    const filePath = `${user?.id ?? 'unknown'}/${Date.now()}.${ext}`
-    const { error: uploadError } = await supabase.storage
-      .from('posts')
-      .upload(filePath, blob, { contentType: blob.type || 'image/jpeg', upsert: false })
-    if (uploadError) throw uploadError
-    const { data } = supabase.storage.from('posts').getPublicUrl(filePath)
-    return data.publicUrl
+    const ext = uri.split('.').pop()?.toLowerCase().split('?')[0] ?? 'jpg'
+    const mimeType = (ext === 'jpg' || ext === 'jpeg') ? 'image/jpeg' : `image/${ext}`
+
+    const { data: { session } } = await supabase.auth.getSession()
+    const userId = session?.user?.id ?? 'unknown'
+    const filePath = `${userId}/${Date.now()}.${ext}`
+
+    const formData = new FormData()
+    formData.append('file', { uri, name: `upload.${ext}`, type: mimeType } as unknown as Blob)
+
+    const response = await fetch(
+      `https://fjfdundcziicyxbrsvgs.supabase.co/storage/v1/object/posts/${filePath}`,
+      {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${session?.access_token}`, 'x-upsert': 'true' },
+        body: formData,
+      }
+    )
+    if (!response.ok) {
+      const err = await response.text()
+      console.error('Upload error:', err)
+      throw new Error('Upload failed. Please try again.')
+    }
+    return `https://fjfdundcziicyxbrsvgs.supabase.co/storage/v1/object/public/posts/${filePath}`
   }, [])
 
   /* ── Step 4: submit ── */
