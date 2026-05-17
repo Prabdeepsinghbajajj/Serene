@@ -12,6 +12,7 @@ import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import * as ImagePicker from 'expo-image-picker'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { supabase } from '@/lib/supabase'
 
 export default function EditProfileScreen() {
@@ -71,8 +72,10 @@ export default function EditProfileScreen() {
       }
     )
     if (response.ok) {
+      // Timestamp suffix ensures the URL stored in DB is unique each upload,
+      // so the profile tab's Avatar key changes and imgError resets.
       setAvatarUrl(
-        `https://fjfdundcziicyxbrsvgs.supabase.co/storage/v1/object/public/avatars/${filePath}`
+        `https://fjfdundcziicyxbrsvgs.supabase.co/storage/v1/object/public/avatars/${filePath}?t=${Date.now()}`
       )
     } else {
       const err = await response.text()
@@ -99,6 +102,7 @@ export default function EditProfileScreen() {
     if (error) {
       Alert.alert('Error', 'Could not save changes.')
     } else {
+      await AsyncStorage.setItem('profile_updated', 'true')
       Alert.alert('Saved', 'Profile updated successfully.', [
         { text: 'OK', onPress: () => router.back() },
       ])

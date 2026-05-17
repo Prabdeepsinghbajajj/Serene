@@ -15,6 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter, useFocusEffect } from 'expo-router'
 import { Lock, Settings } from 'lucide-react-native'
 import * as Haptics from 'expo-haptics'
+import AsyncStorage from '@react-native-async-storage/async-storage'
 import { apiFetch } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 import { getInitials } from '@/lib/utils'
@@ -317,6 +318,7 @@ export default function ProfileScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      void AsyncStorage.removeItem('profile_updated')
       fetchProfileData()
       fetchPosts()
     }, [fetchProfileData, fetchPosts])
