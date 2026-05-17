@@ -160,6 +160,7 @@ function ProfileHeader({
   data: ProfileData
   postsLoading: boolean
 }) {
+  const router = useRouter()
   const { profile, private_stats } = data
   console.log('Profile avatar_url:', profile?.avatar_url)
 
@@ -180,19 +181,29 @@ function ProfileHeader({
         <Text style={styles.bio}>{profile.bio}</Text>
       ) : null}
 
-      {/* Private stats with lock icon */}
+      {/* Private stats — followers/following are tappable */}
       {private_stats && (
         <View style={styles.statsRow}>
           <Lock size={12} color="rgba(245,240,232,0.2)" strokeWidth={1.5} />
-          <Text style={styles.statItem}>
-            <Text style={styles.statNumber}>{private_stats.follower_count}</Text>
-            <Text style={styles.statLabel}> followers</Text>
-          </Text>
+          <TouchableOpacity
+            onPress={() => router.push({ pathname: '/followers', params: { username: profile.username, type: 'followers' } })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.statItem}>
+              <Text style={styles.statNumber}>{private_stats.follower_count}</Text>
+              <Text style={styles.statLabel}> followers</Text>
+            </Text>
+          </TouchableOpacity>
           <Text style={styles.statDivider}>·</Text>
-          <Text style={styles.statItem}>
-            <Text style={styles.statNumber}>{private_stats.following_count}</Text>
-            <Text style={styles.statLabel}> following</Text>
-          </Text>
+          <TouchableOpacity
+            onPress={() => router.push({ pathname: '/followers', params: { username: profile.username, type: 'following' } })}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.statItem}>
+              <Text style={styles.statNumber}>{private_stats.following_count}</Text>
+              <Text style={styles.statLabel}> following</Text>
+            </Text>
+          </TouchableOpacity>
           <Text style={styles.statDivider}>·</Text>
           <Text style={styles.statItem}>
             <Text style={styles.statNumber}>{private_stats.post_count}</Text>
@@ -360,7 +371,14 @@ export default function ProfileScreen() {
         data={posts}
         keyExtractor={(p) => p.id}
         numColumns={3}
-        renderItem={({ item }) => <GridCell post={item} />}
+        renderItem={({ item }) => (
+          <TouchableOpacity
+            onPress={() => router.push({ pathname: '/post-detail', params: { postId: item.id } })}
+            activeOpacity={0.8}
+          >
+            <GridCell post={item} />
+          </TouchableOpacity>
+        )}
         ListHeaderComponent={
           <ProfileHeader data={profileData} postsLoading={postsLoading} />
         }

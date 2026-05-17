@@ -87,6 +87,8 @@ export default function RootLayout() {
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="edit-profile" options={{ headerShown: false }} />
+        <Stack.Screen name="post-detail" options={{ headerShown: false }} />
+        <Stack.Screen name="followers" options={{ headerShown: false }} />
       </Stack>
     </SafeAreaProvider>
   )
