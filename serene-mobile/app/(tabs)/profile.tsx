@@ -1,8 +1,9 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import {
   View,
   Text,
   FlatList,
+  RefreshControl,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
@@ -263,46 +264,62 @@ export default function ProfileScreen() {
     )
   }
 
-  const fetchProfile = useCallback(async () => {
+  const usernameRef = useRef<string | null>(null)
+
+  const resolveUsername = useCallback(async (): Promise<string> => {
+    if (usernameRef.current) return usernameRef.current
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) throw new Error('Not authenticated')
+    const uname =
+      (user.user_metadata?.username as string | undefined) ??
+      (await (async () => {
+        const { data } = await supabase
+          .from('users')
+          .select('username')
+          .eq('id', user.id)
+          .single()
+        return data?.username as string | undefined
+      })())
+    if (!uname) throw new Error('Username not found')
+    usernameRef.current = uname
+    return uname
+  }, [])
+
+  const fetchProfileData = useCallback(async () => {
     setIsLoading(true)
     setError(null)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
-      if (!user) throw new Error('Not authenticated')
-
-      const username =
-        (user.user_metadata?.username as string | undefined) ??
-        (await (async () => {
-          const { data } = await supabase
-            .from('users')
-            .select('username')
-            .eq('id', user.id)
-            .single()
-          return data?.username as string | undefined
-        })())
-
-      if (!username) throw new Error('Username not found')
-
+      const username = await resolveUsername()
       const data = await apiFetch<ProfileData>(`/api/profile/${username}`)
       setProfileData(data)
-
-      setPostsLoading(true)
-      const postsData = await apiFetch<PostsResponse>(
-        `/api/profile/${username}/posts?page=1`
-      )
-      setPosts(postsData.posts)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not load profile.')
     } finally {
       setIsLoading(false)
+    }
+  }, [resolveUsername])
+
+  const fetchPosts = useCallback(async () => {
+    setPostsLoading(true)
+    try {
+      const username = await resolveUsername()
+      const postsData = await apiFetch<PostsResponse>(
+        `/api/profile/${username}/posts?page=1&t=${Date.now()}`
+      )
+      if (__DEV__) console.log('[profile] posts loaded:', postsData.posts?.length, postsData.posts?.map((p) => p.id))
+      setPosts(postsData.posts ?? [])
+    } catch (err) {
+      if (__DEV__) console.error('[profile] posts load error:', err)
+    } finally {
       setPostsLoading(false)
     }
-  }, [])
+  }, [resolveUsername])
 
   useFocusEffect(
     useCallback(() => {
-      fetchProfile()
-    }, [fetchProfile])
+      fetchProfileData()
+      fetchPosts()
+    }, [fetchProfileData, fetchPosts])
   )
 
   if (isLoading) {
@@ -317,7 +334,7 @@ export default function ProfileScreen() {
     return (
       <View style={[styles.root, styles.center]}>
         <Text style={styles.errorText}>{error ?? 'Profile not found.'}</Text>
-        <TouchableOpacity style={styles.retryBtn} onPress={fetchProfile}>
+        <TouchableOpacity style={styles.retryBtn} onPress={() => { void fetchProfileData(); void fetchPosts() }}>
           <Text style={styles.retryText}>Try again</Text>
         </TouchableOpacity>
       </View>
@@ -348,6 +365,14 @@ export default function ProfileScreen() {
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.listContent}
         columnWrapperStyle={styles.columnWrapper}
+        refreshControl={
+          <RefreshControl
+            refreshing={postsLoading}
+            onRefresh={() => { void fetchProfileData(); void fetchPosts() }}
+            tintColor="#8ABD80"
+            colors={['#8ABD80']}
+          />
+        }
         ListEmptyComponent={
           !postsLoading ? (
             <View style={styles.emptyPosts}>
