@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import {
   View,
   Text,
-  Image,
   TouchableOpacity,
   StyleSheet,
   Animated,
@@ -12,6 +11,7 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native'
+import { Image as ExpoImage } from 'expo-image'
 import * as Haptics from 'expo-haptics'
 import { Leaf, MessageCircle, Send } from 'lucide-react-native'
 import type { FeedPost } from '@/types/feed'
@@ -57,10 +57,17 @@ function MoodPill({ mood }: { mood: string }) {
 /* -------------------------------------------------------------------------- */
 
 function Avatar({ uri, name, isRecent }: { uri: string | null; name: string; isRecent: boolean }) {
-  if (uri) {
+  const [imgError, setImgError] = useState(false)
+
+  if (uri && !imgError) {
     return (
       <View style={[styles.avatarOuter, isRecent && styles.avatarOuterActive]}>
-        <Image source={{ uri }} style={styles.avatar} />
+        <ExpoImage
+          source={{ uri }}
+          style={styles.avatar}
+          contentFit="cover"
+          onError={() => setImgError(true)}
+        />
       </View>
     )
   }
@@ -341,9 +348,10 @@ export default function PostCard({ post, onResonance, onDeleted }: PostCardProps
                 <View key={c.id} style={styles.commentRow}>
                   <View style={styles.commentAvatar}>
                     {c.user.avatar_url ? (
-                      <Image
+                      <ExpoImage
                         source={{ uri: c.user.avatar_url }}
                         style={styles.commentAvatarImg}
+                        contentFit="cover"
                       />
                     ) : (
                       <Text style={styles.commentAvatarInitial}>

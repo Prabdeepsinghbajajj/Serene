@@ -80,10 +80,12 @@ export default function DiscoverScreen() {
         ListEmptyComponent={
           <View style={styles.emptyState}>
             <Text style={styles.emptyEmoji}>🧭</Text>
-            <Text style={styles.emptyTitle}>Check back tomorrow</Text>
-            <Text style={styles.emptyBody}>New discoveries arrive each day.</Text>
+            <Text style={styles.emptyTitle}>Nothing new today</Text>
+            <Text style={styles.emptyBody}>
+              Discover shows posts from people you don't follow yet. Follow more people or check back tomorrow for fresh picks.
+            </Text>
             <TouchableOpacity style={styles.refreshBtn} onPress={loadDiscover}>
-              <Text style={styles.refreshBtnText}>Refresh</Text>
+              <Text style={styles.refreshBtnText}>Try again</Text>
             </TouchableOpacity>
           </View>
         }

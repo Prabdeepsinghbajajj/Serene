@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import {
   View,
   Text,
-  Image,
   FlatList,
   TouchableOpacity,
   StyleSheet,
@@ -10,9 +9,11 @@ import {
   Alert,
   Dimensions,
 } from 'react-native'
+import { Image } from 'expo-image'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { useRouter } from 'expo-router'
 import { Lock, Settings } from 'lucide-react-native'
+import * as Haptics from 'expo-haptics'
 import { apiFetch } from '@/lib/api'
 import { supabase } from '@/lib/supabase'
 import { getInitials } from '@/lib/utils'
@@ -73,28 +74,46 @@ const MOOD_EMOJI: Record<string, string> = {
 /* -------------------------------------------------------------------------- */
 
 function Avatar({ uri, name, size = 80 }: { uri: string | null; name: string; size?: number }) {
-  const ring = {
-    width: size,
-    height: size,
-    borderRadius: size / 2,
-    borderWidth: 2,
-    borderColor: 'rgba(138,189,128,0.3)',
-  } as const
+  const [imgError, setImgError] = useState(false)
 
-  if (uri) {
-    return (
-      <View style={[ring, { overflow: 'hidden' }]}>
-        <Image source={{ uri }} style={{ width: size, height: size }} />
-      </View>
-    )
-  }
-  return (
-    <View style={[styles.avatarFallback, ring]}>
-      <Text style={[styles.avatarInitials, { fontSize: size * 0.28 }]}>
+  const fallback = (
+    <View style={{
+      width: size,
+      height: size,
+      borderRadius: size / 2,
+      backgroundColor: 'rgba(78,122,68,0.3)',
+      alignItems: 'center' as const,
+      justifyContent: 'center' as const,
+      borderWidth: 2,
+      borderColor: 'rgba(138,189,128,0.3)',
+      overflow: 'hidden' as const,
+    }}>
+      <Text style={{ color: '#8ABD80', fontSize: size * 0.32, fontWeight: '600' }}>
         {getInitials(name)}
       </Text>
     </View>
   )
+
+  if (uri && !imgError) {
+    return (
+      <Image
+        source={{ uri }}
+        style={{
+          width: size,
+          height: size,
+          borderRadius: size / 2,
+          borderWidth: 2,
+          borderColor: 'rgba(138,189,128,0.3)',
+        }}
+        contentFit="cover"
+        onError={() => {
+          console.log('Avatar failed to load:', uri)
+          setImgError(true)
+        }}
+      />
+    )
+  }
+  return fallback
 }
 
 /* -------------------------------------------------------------------------- */
@@ -109,7 +128,7 @@ function GridCell({ post }: { post: ProfilePost }) {
       <Image
         source={{ uri: post.media_urls[0] }}
         style={styles.gridCell}
-        resizeMode="cover"
+        contentFit="cover"
       />
     )
   }
@@ -140,6 +159,7 @@ function ProfileHeader({
   postsLoading: boolean
 }) {
   const { profile, private_stats } = data
+  console.log('Profile avatar_url:', profile?.avatar_url)
 
   return (
     <View style={styles.headerSection}>
@@ -199,15 +219,40 @@ export default function ProfileScreen() {
 
   function handleSettingsPress() {
     Alert.alert(
-      'Account',
+      'Settings',
       '',
       [
         {
+          text: 'Edit profile',
+          onPress: () => router.push('/edit-profile'),
+        },
+        {
+          text: 'Wellness settings',
+          onPress: () => Alert.alert(
+            'Wellness settings',
+            'Session reminders and daily limits can be adjusted on serene.network/settings',
+            [{ text: 'OK' }]
+          ),
+        },
+        {
           text: 'Sign out',
           style: 'destructive',
-          onPress: async () => {
-            await supabase.auth.signOut()
-            router.replace('/(auth)/login')
+          onPress: () => {
+            Alert.alert(
+              'Sign out',
+              'Are you sure you want to sign out?',
+              [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Sign out',
+                  style: 'destructive',
+                  onPress: async () => {
+                    await supabase.auth.signOut()
+                    router.replace('/(auth)/login')
+                  },
+                },
+              ]
+            )
           },
         },
         {

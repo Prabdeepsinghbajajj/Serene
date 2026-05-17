@@ -150,14 +150,15 @@ All tables have RLS enabled. Key tables:
 
 ### Mobile App ✅ (Expo Go testing)
 - Feed with real PostCards from live API
-- Comments (tap icon to expand, type and send)
+- Comments (tap icon to expand, type and send, delete own)
 - Long press own post → delete
-- Profile with post grid, stats
+- Profile with post grid, stats, avatar (with onError fallback to initials)
 - Companion chat (non-streaming, real Claude API)
 - Create post with photo upload to Supabase Storage
 - Tab bar: Home, Discover, Create (green circle), Profile, Companion
-- Sign out via settings gear → Alert
-- Edit profile screen (display name, bio, avatar)
+- Settings sheet: Edit profile, Wellness settings, Sign out (with confirm), Cancel
+- Edit profile screen (display name, bio, avatar photo picker → Supabase Storage)
+- Discover screen with debug logging + manual Refresh button in empty state
 - Auth: login + signup screens with dark glass design
 
 ---
@@ -165,20 +166,22 @@ All tables have RLS enabled. Key tables:
 ## Known Bugs & In Progress
 
 ### Mobile — High Priority 🔴
-- [ ] Profile avatar showing empty circle (no photo, no initials)
-      → avatar_url loads but Image fails silently, fallback not rendering
-      → Check: console.log('Profile avatar_url:', profile?.avatar_url)
+- [ ] Profile avatar may still show empty depending on device/network
+      → Avatar component now has onError → initials fallback
+      → console.log('Profile avatar_url:', ...) fires on every profile render
+      → Check Expo console for the URL value; if null → no avatar uploaded yet
 - [ ] Sign in error not yet fully diagnosed
       → May be email not confirmed or network issue
+      → Added URL/key prefix logs to supabase.ts for env var verification
 - [ ] Haptics not confirmed working on iPhone
-      → expo-haptics installed but ImpactFeedbackStyle.Light may need testing
-      → Added test button to profile to isolate the issue
+      → expo-haptics@14.0.1 installed, import is correct
+      → "Test Haptic" button in profile screen isolates the issue
+      → Remove test button once confirmed working
 
 ### Mobile — Medium Priority 🟡
 - [ ] Discover screen sometimes empty
       → Discovery cache may be empty for this user
-      → Refresh button added but root cause unclear
-- [ ] Settings Alert only had sign out (fix applied — now has Edit Profile + Wellness)
+      → Refresh button added; debug logs show post count + refreshes_at
 - [ ] No search for users on mobile
 
 ### Web — Medium Priority 🟡
@@ -344,9 +347,9 @@ git push
 
 ## What to Work on Next (Priority Order)
 
-1. Fix mobile avatar empty circle bug
-2. Diagnose and fix mobile sign in error
-3. Confirm haptics working on iPhone
+1. Confirm avatar fix works on device (check Expo console log for avatar_url value)
+2. Remove "Test Haptic" button from profile once haptics confirmed working
+3. Diagnose and fix mobile sign in error (check URL prefix log in supabase.ts)
 4. Add user search on mobile
 5. Stories feature (web + mobile)
 6. Push notifications

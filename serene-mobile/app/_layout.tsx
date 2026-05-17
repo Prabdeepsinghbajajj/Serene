@@ -25,13 +25,27 @@ export default function RootLayout() {
 
   // Phase 1: resolve session, then flip loading off so Stack mounts
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (error) {
+        console.log('[auth] Session error, clearing:', error.message)
+        supabase.auth.signOut().then(() => {
+          setSession(null)
+          setLoading(false)
+        })
+        return
+      }
+      setSession(data.session)
       setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => setSession(session)
+      (event, session) => {
+        if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+          setSession(session)
+        } else if (event === 'SIGNED_OUT') {
+          setSession(null)
+        }
+      }
     )
     return () => subscription.unsubscribe()
   }, [])
@@ -72,6 +86,7 @@ export default function RootLayout() {
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="(auth)" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="edit-profile" options={{ headerShown: false }} />
       </Stack>
     </SafeAreaProvider>
   )

@@ -90,7 +90,7 @@ export default function CreateScreen() {
 
   const pickImage = useCallback(async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: 'images',
       quality: 0.85,
       allowsEditing: true,
       aspect: [4, 3],
